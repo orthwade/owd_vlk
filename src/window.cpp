@@ -2,11 +2,15 @@
 
 namespace owd
 {
+    c_window *c_window::m_singleton{};
+
     void c_window::init(int32_t _w, int32_t _h, std::string_view _name,
                         const std::vector<s_wnd_hint> &_vec_hint)
     {
         glfwDestroyWindow(m_glfw_wnd);
-        m_glfw_init_result =  glfwInit();
+
+        m_glfw_init_result = glfwInit();
+
         for (const s_wnd_hint &hint : _vec_hint)
             glfwWindowHint(hint.hint_id, hint.value);
 
@@ -19,5 +23,12 @@ namespace owd
         {
             glfwPollEvents();
         }
+    }
+
+    void c_window::terminate()
+    {
+        close();
+        glfwTerminate();
+        delete m_singleton;
     }
 } // namespace owd
