@@ -6,6 +6,16 @@ project(owd_vlk)
 
 find_package(Vulkan REQUIRED)
 
+SET(GCC_COVERAGE_LINK_FLAGS 
+"-lglfw"
+"-lvulkan"
+"-ldl"
+"-lpthread"
+"-lX11"
+"-lXxf86vm"
+"-lXrandr"
+"-lXi")
+
 message(STATUS ${Vulkan_INCLUDE_DIR})
 message(STATUS ${VULKAN_LIB_LIST})
 message(STATUS ${Vulkan_LIBRARIES})
