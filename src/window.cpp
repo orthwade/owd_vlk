@@ -11,13 +11,13 @@ namespace owd
 
         m_glfw_init_result = glfwInit();
 
-        for (const s_wnd_hint &hint : _vec_hint)
-            glfwWindowHint(hint.hint_id, hint.value);
+        for (const s_wnd_hint &hint_ : _vec_hint)
+            glfwWindowHint(hint_.hint_id, hint_.value);
 
         m_glfw_wnd = glfwCreateWindow(_w, _h, _name.data(), nullptr, nullptr);
     }
 
-    void c_window::process()
+    void c_window::run()
     {
         while (!glfwWindowShouldClose(m_glfw_wnd))
         {
@@ -29,6 +29,10 @@ namespace owd
     {
         close();
         glfwTerminate();
-        delete m_singleton;
+        if (m_singleton)
+        {
+            delete m_singleton;
+            m_singleton = nullptr;
+        }
     }
 } // namespace owd

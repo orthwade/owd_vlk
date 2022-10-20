@@ -17,7 +17,6 @@ namespace owd
 {
     struct s_wnd_hint
     {
-        s_wnd_hint(int32_t _hint_id, int32_t _value) : hint_id(_hint_id), value(_value) {}
         int32_t hint_id{};
         int32_t value{};
     };
@@ -27,7 +26,9 @@ namespace owd
     {
     public:
         /// @brief Get reference to single instance of this class object.
-        inline static c_window &get() { return m_singleton ? *m_singleton : (*(m_singleton = new c_window)); }
+        inline static c_window& get() { return m_singleton ? *m_singleton : (*(m_singleton = new c_window)); }
+        inline static c_window* const get_ptr() 
+        { return m_singleton ? m_singleton : (m_singleton = new c_window); }
 
         /// @brief Open window with given width, height and GLFW hints.
         /// @param _w Window width.
@@ -35,14 +36,14 @@ namespace owd
         /// @param _name Window name.
         /// @param _vec_hint Vector of window hints.
         void init(int32_t _w = 500, int32_t _h = 500, std::string_view _name = "Default window",
-                  const std::vector<s_wnd_hint> &_vec_hint =
+                  const std::vector<s_wnd_hint>& _vec_hint =
                     {
                         { GLFW_CLIENT_API, GLFW_NO_API },
                         { GLFW_RESIZABLE, GLFW_FALSE }
                     });
 
         /// @brief Start updating window.
-        void process();
+        void run();
 
         /// @brief Close window.
         inline void close() { glfwDestroyWindow(m_glfw_wnd); }
@@ -53,18 +54,18 @@ namespace owd
 
         /// @brief Get GLFW window raw pointer.
         /// @return
-        inline GLFWwindow *get_glfw_wnd_ptr() { return m_glfw_wnd; }
+        inline GLFWwindow const* const get_glfw_wnd_ptr() const { return m_glfw_wnd; }
 
-        c_window(const c_window &) = delete;
-        c_window &operator=(const c_window &) = delete;
+        c_window(const c_window&) = delete;
+        c_window& operator=(const c_window&) = delete;
 
     protected:
         c_window() {}
 
         int32_t m_glfw_init_result{};
 
-        GLFWwindow *m_glfw_wnd{};
+        GLFWwindow* m_glfw_wnd{};
 
-        static c_window *m_singleton;
+        static c_window* m_singleton;
     };
 } // namespace owd
