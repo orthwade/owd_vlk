@@ -56,16 +56,16 @@ namespace owd
         /// @return
         inline GLFWwindow const* const get_glfw_wnd_ptr() const { return m_glfw_wnd; }
 
-        c_window(const c_window&) = delete;
-        c_window& operator=(const c_window&) = delete;
-
     protected:
-        c_window() {}
+        c_window();
 
         int32_t m_glfw_init_result{};
 
         GLFWwindow* m_glfw_wnd{};
 
         static c_window* m_singleton;
+
+        c_window(const c_window&) = delete;
+        c_window& operator=(const c_window&) = delete;
     };
 } // namespace owd

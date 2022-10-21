@@ -20,6 +20,7 @@ namespace owd
 
     c_app::c_app()
         :
+        m_shaders(c_shaders::get_ptr()),
         m_window(c_window::get_ptr())
     {
         m_window->init();

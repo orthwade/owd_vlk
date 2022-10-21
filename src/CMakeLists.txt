@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.7...3.20 FATAL_ERROR)
 
+set(${BUILD_DIR} ../out/build )
+
 set(CMAKE_CXX_STANDARD 17)
 
 project(owd_vlk)
@@ -20,21 +22,22 @@ message(STATUS ${Vulkan_INCLUDE_DIR})
 message(STATUS ${VULKAN_LIB_LIST})
 message(STATUS ${Vulkan_LIBRARIES})
 
-
 set(VULKAN_LIB_LIST "vulkan-1")
 
-add_executable(${PROJECT_NAME} main.cpp app.cpp window.cpp)
+add_executable(${PROJECT_NAME} main.cpp app.cpp window.cpp window.h)
 
 add_subdirectory(external/glfw)
 add_subdirectory(external/glm)
+add_subdirectory(shader)
+add_subdirectory(owd_lib)
 
 target_include_directories(${PROJECT_NAME} 
 PUBLIC external/glfw/include
-PUBLIC external/glm/include)
-
-
-
-target_include_directories(${PROJECT_NAME} PUBLIC ${Vulkan_INCLUDE_DIR})
+PUBLIC external/glm/include
+PUBLIC ${Vulkan_INCLUDE_DIR}
+PUBLIC shader
+PUBLIC owd_lib
+)
 
 target_link_directories(${PROJECT_NAME} 
 PRIVATE external/glfw/src
@@ -43,10 +46,18 @@ PRIVATE external/glfw/src/Release
 PRIVATE external/glm/src
 PRIVATE external/glm/src/Debug
 PRIVATE external/glm/src/Release
+PRIVATE owd_lib
 PRIVATE ${Vulkan_LIBRARIES}
+PRIVATE shader
 )
 
 target_link_libraries(${PROJECT_NAME} 
 glfw
 glm
-${Vulkan_LIBRARIES})	
+owd_lib
+${Vulkan_LIBRARIES}
+shader
+)	
+
+configure_file(shader/vertex.spv ${CMAKE_BINARY_DIR}/shader/vertex.spv COPYONLY)
+configure_file(shader/fragment.spv ${CMAKE_BINARY_DIR}/shader/fragment.spv  COPYONLY)

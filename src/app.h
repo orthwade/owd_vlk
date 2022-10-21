@@ -1,5 +1,6 @@
 #pragma once
 #include "window.h"
+#include "shader/shader.h"
 
 namespace owd
 {
@@ -20,6 +21,7 @@ namespace owd
 
         /// <summary>
         /// Terminate the app. Close the window, terminate GLFW and delete this class singleton object.
+        /// get() will be required to use this class further.
         /// </summary>
         void terminate();
 
@@ -29,9 +31,13 @@ namespace owd
         /// <returns></returns>
         inline const c_window& get_window() { return *m_window; }
 
+        c_app(const c_app&) = delete;
+        c_app& operator=(const c_app&) = delete;
+
         protected:
-        c_window* m_window{};
-        
+        c_window* m_window;
+        c_shaders* m_shaders;
+
         c_app();
         ~c_app();
 
