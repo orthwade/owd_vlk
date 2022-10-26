@@ -7,13 +7,7 @@ int main(int32_t arg_count, char *args[])
 {
     c_app& app_ = c_app::get();
 
-    //app_.run();
-
-    //app_.terminate();
-    
-    vec_byte_t vec_byte_{};
-
-
+    app_.terminate();
 
     return 0;
 }

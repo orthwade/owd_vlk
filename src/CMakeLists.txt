@@ -57,6 +57,11 @@ glm
 owd_lib
 ${Vulkan_LIBRARIES}
 shader
+)
+
+add_custom_command(TARGET ${PROJECT_NAME}
+    PRE_BUILD
+    COMMAND odb -o /home/david/dev/ --std c++11 -I/home/david/dev/ -d sqlite --generate-    query --generate-schema ${PROMOTER_LIB_PREFIX}/entities/person.hpp
 )	
 
 configure_file(shader/vertex.spv ${CMAKE_BINARY_DIR}/shader/vertex.spv COPYONLY)
