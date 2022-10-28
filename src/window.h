@@ -5,13 +5,8 @@
 #include <vector>
 
 #define GLFW_INCLUDE_VULKAN
+
 #include <GLFW/glfw3.h>
-
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-
-#include <glm/vec4.hpp>
-#include <glm/mat4x4.hpp>
 
 namespace owd
 {
@@ -25,8 +20,18 @@ namespace owd
     class c_window
     {
     public:
-        /// @brief Get reference to single instance of this class object.
+        /// <summary>
+        /// Create singleton object, if not created already. 
+        /// Get reference to single instance of this class object.
+        /// </summary>
+        /// <returns></returns>
         inline static c_window& get() { return m_singleton ? *m_singleton : (*(m_singleton = new c_window)); }
+
+        /// <summary>
+        /// Create singleton object, if not created already. 
+        /// Get pointer to single instance of this class object.
+        /// </summary>
+        /// <returns></returns>
         inline static c_window* const get_ptr() 
         { return m_singleton ? m_singleton : (m_singleton = new c_window); }
 
@@ -45,6 +50,11 @@ namespace owd
         /// @brief Start updating window.
         void run();
 
+        /// <summary>
+        /// Set windows mode to fullscreen.
+        /// </summary>
+        void set_fullscreen();
+
         /// @brief Close window.
         inline void close() { glfwDestroyWindow(m_glfw_wnd); }
 
@@ -62,6 +72,8 @@ namespace owd
         int32_t m_glfw_init_result;
 
         GLFWwindow* m_glfw_wnd;
+        
+        //std::vector<c_monitor::ptr> m_vec_monitor;
 
         static c_window* m_singleton;
 

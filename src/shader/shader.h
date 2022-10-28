@@ -35,13 +35,10 @@ namespace owd
 
         /// <summary>
         /// Construct object of this class, 
-        /// make shared_ptr of this object class and get this shared_ptr. 
+        /// Make shared_ptr of this object class and get this shared_ptr. 
         /// </summary>
         /// <returns></returns>
-        inline static ptr make()
-        {
-            return std::make_shared<c_shader>();
-        }
+        inline static ptr make() { return std::make_shared<c_shader>(); }
 
         /// <summary>
         /// Construct object and store data from file.

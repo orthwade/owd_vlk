@@ -7,6 +7,8 @@ int main(int32_t arg_count, char *args[])
 {
     c_app& app_ = c_app::get();
 
+    app_.run();
+
     app_.terminate();
 
     string str_1_{ "String 1" };
@@ -21,6 +23,8 @@ int main(int32_t arg_count, char *args[])
     wstring w_str_5_{ convert_utf8_to_utf16(str_1_) };
 
     std::wcout << w_str_5_ << '\n';
+    std::wcout << w_str_2_ << '\n';
+    std::cout << str_2_ << '\n';
     std::wcout << w_str_2_ << '\n';
 
     return 0;

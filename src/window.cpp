@@ -25,6 +25,10 @@ namespace owd
         }
     }
 
+    void owd::c_window::set_fullscreen()
+    {
+    }
+
     void c_window::terminate()
     {
         close();

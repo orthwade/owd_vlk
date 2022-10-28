@@ -24,7 +24,12 @@ message(STATUS ${Vulkan_LIBRARIES})
 
 set(VULKAN_LIB_LIST "vulkan-1")
 
-add_executable(${PROJECT_NAME} main.cpp app.cpp window.cpp window.h)
+add_executable(${PROJECT_NAME}
+glfw_init.h  glfw_init.cpp  
+window.h     window.cpp
+monitor.h    monitor.cpp
+app.h	     app.cpp
+main.cpp)
 
 add_subdirectory(external/glfw)
 add_subdirectory(external/glm)
