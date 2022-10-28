@@ -34,8 +34,9 @@ namespace owd
         inline c_window& get_window() { return *m_window; }
 
         /// <summary>
-        /// 
+        /// Get reference to shader manager.
         /// </summary>
+        /// <returns></returns>
         inline c_shaders& get_shaders() { return *m_shaders; }
 
         protected:
