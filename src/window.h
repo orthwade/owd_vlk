@@ -59,9 +59,9 @@ namespace owd
     protected:
         c_window();
 
-        int32_t m_glfw_init_result{};
+        int32_t m_glfw_init_result;
 
-        GLFWwindow* m_glfw_wnd{};
+        GLFWwindow* m_glfw_wnd;
 
         static c_window* m_singleton;
 

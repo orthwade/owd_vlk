@@ -35,4 +35,13 @@ namespace owd
             m_singleton = nullptr;
         }
     }
+
+    c_window::c_window()
+        :
+        m_glfw_init_result(),
+        m_glfw_wnd()
+    {
+
+    }
+
 } // namespace owd

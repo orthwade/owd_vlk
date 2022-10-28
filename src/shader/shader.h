@@ -1,6 +1,6 @@
 #pragma once
 #include <string_view>
-#include "../owd_lib/owd_filesystem.h"
+#include "../owd_lib/owd_lib.h"
 
 namespace owd
 {
@@ -21,7 +21,7 @@ namespace owd
         using ptr = std::shared_ptr<c_shader>;
 
         /// <summary>
-        /// construct object and store data from file with given filepath and name, 
+        /// Construct object and store data from file with given filepath and name, 
         /// make shared_ptr of this object class and get this shared_ptr.		
         /// </summary>
         /// <param name="_filepath"></param>
@@ -34,7 +34,7 @@ namespace owd
         }
 
         /// <summary>
-        /// construct object of this class, 
+        /// Construct object of this class, 
         /// make shared_ptr of this object class and get this shared_ptr. 
         /// </summary>
         /// <returns></returns>
@@ -44,7 +44,7 @@ namespace owd
         }
 
         /// <summary>
-        /// construct object and store data from file.
+        /// Construct object and store data from file.
         /// </summary>
         /// <param name="_filepath"></param>
         /// <param name="_shadername">Name of this object. 
