@@ -19,4 +19,6 @@ namespace owd
 		m_glfw_init_result(glfwInit())
 	{
 	}
+
+	static c_glfw_init& glfw_init_ = c_glfw_init::get();
 } // namespace owd

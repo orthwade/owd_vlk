@@ -35,7 +35,7 @@ namespace owd
         /// Get GLFW init result int code.
         /// </summary>
         /// <returns></returns>
-        inline int32_t get_init_result_int() { return m_glfw_init_result; }
+        inline int32_t get_init_result_int() const { return m_glfw_init_result; }
 
         /// @brief Terminate GLFW. Delete singleton. 
         /// get() will be required to use this class further.

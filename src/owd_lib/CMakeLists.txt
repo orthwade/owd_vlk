@@ -6,4 +6,5 @@ owd_string.h		owd_string.cpp
 owd_object.h		owd_object.cpp
 owd_filesystem.h	owd_filesystem.cpp
 owd_output.h		owd_output.cpp
+owd_logger.h		owd_logger.cpp
 owd_lib.h			owd_lib.cpp)

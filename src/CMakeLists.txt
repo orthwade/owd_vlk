@@ -25,6 +25,7 @@ message(STATUS ${Vulkan_LIBRARIES})
 set(VULKAN_LIB_LIST "vulkan-1")
 
 add_executable(${PROJECT_NAME}
+glfw_error.h glfw_error.cpp
 glfw_init.h  glfw_init.cpp  
 window.h     window.cpp
 monitor.h    monitor.cpp
