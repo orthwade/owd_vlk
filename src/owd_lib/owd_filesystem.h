@@ -22,32 +22,32 @@ namespace owd
 	/// <returns></returns>
 	bool append_to_file(std::wstring_view _text, std::wstring_view _filepath);
 
-	/// <summary>
-	/// Append output to textfile.
-	/// </summary>
-	/// <typeparam name="T"></typeparam>
-	/// <param name="_output"></param>
-	/// <param name="_filepath"></param>
-	/// <returns></returns>
-	template<class T>
-	bool append_to_file(const T& _output, std::wstring_view _filepath)
-	{
-		bool result = false;
+	///// <summary>
+	///// Append output to textfile.
+	///// </summary>
+	///// <typeparam name="T"></typeparam>
+	///// <param name="_output"></param>
+	///// <param name="_filepath"></param>
+	///// <returns></returns>
+	//template<class T>
+	//bool append_to_file(const T& _output, std::wstring_view _filepath)
+	//{
+	//	bool result = false;
 
-		std::wofstream ofstream_{ _filepath.data(), std::ios_base::app };
+	//	std::wofstream ofstream_{ _filepath.data(), std::ios_base::app };
 
-		if (ofstream_)
-		{
-			ofstream_ << _output;
+	//	if (ofstream_)
+	//	{
+	//		ofstream_ << _output;
 
-			if (!ofstream_.bad())
-			{
-				result = true;
-			}
-		}
+	//		if (!ofstream_.bad())
+	//		{
+	//			result = true;
+	//		}
+	//	}
 
-		return result;
-	}
+	//	return result;
+	//}
 
 	/// <summary>
 	/// Class of binary file.

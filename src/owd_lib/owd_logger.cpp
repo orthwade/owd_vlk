@@ -4,97 +4,203 @@ namespace owd
 {
     const std::wstring c_logger::logger_folder_path{ current_path_str_ + L"/logger/" };
 
-    c_logger::c_logger(std::wstring_view _name, enm_mode _mode)
+    c_logger::enm_mode c_logger::m_global_mode{ c_logger::none };
+
+    c_logger::c_logger(std::wstring_view _name, enm_mode _mode, bool _use_global_mode)
         :
         c_object(_name),
+        m_use_global_mode(_use_global_mode),
         m_mode(_mode),
         m_new_line(true),
         m_filepath(logger_folder_path + std::wstring(_name) + L".txt"),
-        m_wstr_buffer()
+		m_line()
     {
     }
 
-    c_logger& c_logger::operator<<(std::wstring_view _output)
-    {
-        if (!_output.empty())
-        {
-            switch (m_mode)
-            {
-            case none:
-                break;
+	std::wstring c_logger::new_line_prompt()
+	{
+		std::wstring result{};
 
-            case console:
-                print_to_console(_output);
-                break;
+		result.push_back(L'[');
+		result.append(current_time_date_wstr());
+		result.append(L"; ");
+		result.append(m_name);
+		result.append(L"]: ");
 
-            case file:
-                print_to_file(_output);
-                break;
+		return result;
+	}
 
-            case both:
-                print_to_both(_output);
-                break;
+	void c_logger::update_new_line(std::wstring_view _output)
+	{
+		if (!_output.empty())
+		{
+			if (_output.back() == L'\n')
+			{
+				m_new_line = true;
+			}
+		}
+	}
 
-            default:
-                break;
-            }
-        }
+	void c_logger::print_to_both(std::wstring_view _output)
+	{
+		std::wstring line_{ line(_output) };
 
-        return *this;
-    }
+		std::wcout << line_;
+		append_to_file(line_, m_filepath);
+	}
 
-    void c_logger::update_new_line(std::wstring_view _output)
-    {
-        if (_output.back() == '\n')
-        {
-            m_new_line = true;
-        }
-    }
-    void c_logger::print_to_console(std::wstring_view _output)
-    {
-        if (m_new_line)
-        {
-            std::wcout << '[' << current_time_date_wstr() << L"]; " << _output;
-            m_new_line = false;
-        }
-        else
-        {
-            std::wcout << _output;
-        }
-        update_new_line(_output);
-    }
-    void c_logger::print_to_file(std::wstring_view _output)
-    {
-        if (m_new_line)
-        {
-            append_to_file_('[');
-            append_to_file_(current_time_date_wstr());
-            append_to_file_(L"]; ");
-            append_to_file_(_output);
-            m_new_line = false;
-        }
-        else
-        {
-            append_to_file_(_output);
-        }
-        update_new_line(_output);
-    }
-    void c_logger::print_to_both(std::wstring_view _output)
-    {
-        if (m_new_line)
-        {
-            std::wcout << '[' << current_time_date_wstr() << L"]; " << _output;
-            append_to_file_('[');
-            append_to_file_(current_time_date_wstr());
-            append_to_file_(L"]; ");
-            append_to_file_(_output);
-            m_new_line = false;
-        }
-        else
-        {
-            std::wcout << _output;
-            append_to_file_(_output);
-        }
-        update_new_line(_output);
-    }
+	c_logger& c_logger::operator<<(std::wstring_view _output)
+	{
+		enm_mode mode{ m_use_global_mode ? m_global_mode : m_mode };
+
+		if (mode != none)
+		{
+			switch (mode)
+			{
+			case console:
+				print_to_console(_output);
+				break;
+
+			case file:
+				print_to_file(_output);
+				break;
+
+			case both:
+				print_to_both(_output);
+				break;
+
+			default:
+				break;
+			}
+			update_new_line(_output);
+		}
+
+		return *this;
+	}
+
+	c_logger& c_logger::operator<<(char _output)
+	{
+		enm_mode mode{ m_use_global_mode ? m_global_mode : m_mode };
+
+		if (mode != none)
+		{
+			std::string  str_ { _output };
+			std::wstring wstr_{ convert_utf8_to_utf16(str_) };
+			switch (mode)
+			{
+			case console:
+				print_to_console(wstr_);
+				break;
+
+			case file:
+				print_to_file(wstr_);
+				break;
+
+			case both:
+				print_to_both(wstr_);
+				break;
+
+			default:
+				break;
+			}
+			update_new_line(wstr_);
+		}
+
+		return *this;
+	}
+	
+	c_logger& c_logger::operator<<(wchar_t _output)
+	{
+		enm_mode mode{ m_use_global_mode ? m_global_mode : m_mode };
+
+		if (mode != none)
+		{
+			std::wstring wstr_{ _output };
+
+			switch (mode)
+			{
+			case console:
+				print_to_console(wstr_);
+				break;
+
+			case file:
+				print_to_file(wstr_);
+				break;
+
+			case both:
+				print_to_both(wstr_);
+				break;
+
+			default:
+				break;
+			}
+			update_new_line(wstr_);
+		}
+
+		return *this;
+	}
+
+	c_logger& c_logger::operator<<(const char* _output)
+	{
+		enm_mode mode{ m_use_global_mode ? m_global_mode : m_mode };
+
+		if (mode != none)
+		{
+			std::string  str_{ _output };
+			std::wstring wstr_{ convert_utf8_to_utf16(str_) };
+
+			switch (mode)
+			{
+			case console:
+				print_to_console(wstr_);
+				break;
+
+			case file:
+				print_to_file(wstr_);
+				break;
+
+			case both:
+				print_to_both(wstr_);
+				break;
+
+			default:
+				break;
+			}
+			update_new_line(wstr_);
+		}
+
+		return *this;
+	}
+
+	c_logger& c_logger::operator<<(const wchar_t* _output)
+	{
+		enm_mode mode{ m_use_global_mode ? m_global_mode : m_mode };
+
+		if (mode != none)
+		{
+			std::wstring wstr_{ _output };
+
+			switch (mode)
+			{
+			case console:
+				print_to_console(wstr_);
+				break;
+
+			case file:
+				print_to_file(wstr_);
+				break;
+
+			case both:
+				print_to_both(wstr_);
+				break;
+
+			default:
+				break;
+			}
+			update_new_line(wstr_);
+		}
+
+		return *this;
+	}
+
 } // namespace owd

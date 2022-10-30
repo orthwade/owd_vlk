@@ -63,7 +63,6 @@ namespace owd
 	{
 		bool result = false;
 
-
 		std::wofstream ofstream_{ _filepath.data(), std::ios_base::app};
 
 		ofstream_.imbue(utf8_locale_);

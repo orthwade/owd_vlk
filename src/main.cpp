@@ -5,12 +5,12 @@ using namespace owd;
 
 int main(int32_t arg_count, char *args[])
 {
-    c_logger::ptr logger_ptr_ = c_logger::make(L"ֻמדדונ", c_logger::both);
+    c_logger::ptr logger_ptr_ = c_logger::make(L"ֻמדדונ", c_logger::both, false);
 
     c_logger& logger_ = *logger_ptr_;
 
-    logger_ << "" << "1111" << L"פגכאûששמא\n" << L"q34rq3f\n" << L"װÛגשכפײÙֻכג\n";
-    
+    logger_ << "" << "1111" << L"פגכאûששמא\n" << L"q34rq3f\n" << L"װÛגשכפײÙֻכג\n" << 156 << L'\n';
+    logger_ << "11123";
     c_app& app_ = c_app::get();
 
     //app_.run();

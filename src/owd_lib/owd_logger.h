@@ -32,6 +32,62 @@ namespace owd
 		static const enm_mode file	 { enm_mode::file };
 		static const enm_mode both	 { enm_mode::both };
 
+		/// <summary>
+		/// Get logger global_mode.
+		/// </summary>
+		/// <returns></returns>
+		inline static enm_mode get_global_mode() { return m_global_mode; }
+
+		/// <summary>
+		/// Set logger global_mode.
+		/// </summary>
+		/// <param name="_global_mode"></param>
+		inline void static set_global_mode(enm_mode _global_mode) { m_global_mode = _global_mode; }
+
+		/// <summary>
+		/// No output.
+		/// </summary>
+		inline void static set_global_mode_none(enm_mode _global_mode) { m_global_mode = none; }
+
+		/// <summary>
+		/// Output to console.
+		/// </summary>
+		inline void static set_global_mode_console(enm_mode _global_mode) { m_global_mode = console; }
+
+		/// <summary>
+		/// Output to file.
+		/// </summary>
+		inline void static set_global_mode_file(enm_mode _global_mode) { m_global_mode = file; }
+
+		/// <summary>
+		/// Output to console and file.
+		/// </summary>
+		inline void static set_global_mode_both(enm_mode _global_mode) { m_global_mode = both; }
+
+		/// <summary>
+		/// Check if the global_mode of this logger is none.
+		/// </summary>
+		/// <returns></returns>
+		inline static bool global_mode_is_none() { return m_global_mode == none; }
+
+		/// <summary>
+		/// Check if the global_mode of this logger is console.
+		/// </summary>
+		/// <returns></returns>
+		inline static bool global_mode_is_console() { return m_global_mode == console; }
+
+		/// <summary>
+		/// Check if the global_mode of this logger is file.
+		/// </summary>
+		/// <returns></returns>
+		inline static bool global_mode_is_file() { return m_global_mode == file; }
+
+		/// <summary>
+		/// Check if the global_mode of this logger is both.
+		/// </summary>
+		/// <returns></returns>
+		inline static bool global_mode_is_both() { return m_global_mode == both; }
+
 		static const std::wstring logger_folder_path;
 
 		/// <summary>
@@ -39,7 +95,8 @@ namespace owd
 		/// </summary>
 		/// <param name="_name"></param>
 		/// <param name="_mode"></param>
-		c_logger(std::wstring_view _name = L"logger", enm_mode _mode = none);
+		/// <param name="_use_global_mode"></param>
+		c_logger(std::wstring_view _name = L"logger", enm_mode _mode = none, bool _use_global_mode = true);
 
 		/// <summary>
 		/// Construct object of this class with given name and mode, 
@@ -48,9 +105,10 @@ namespace owd
 		/// <param name="_name"></param>
 		/// <param name="_mode"></param>
 		/// <returns></returns>
-		inline static ptr make(std::wstring_view _name = L"logger", enm_mode _mode = none)
+		inline static ptr make
+		(std::wstring_view _name = L"logger", enm_mode _mode = none, bool _use_global_mode = true)
 		{
-			return std::make_shared<c_logger>(_name, _mode);
+			return std::make_shared<c_logger>(_name, _mode, _use_global_mode);
 		}
 		
 		/// <summary>
@@ -58,6 +116,56 @@ namespace owd
 		/// </summary>
 		/// <returns></returns>
 		inline enm_mode get_mode() const { return m_mode; }
+
+		/// <summary>
+		/// If m_use_global_mode get global mode, else get personal mode.
+		/// </summary>
+		inline enm_mode check_mode() const
+		{
+			return m_use_global_mode ? m_global_mode : m_mode;
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="_output">If m_use_global_mode: m_global_mode == none, else m_mode == none.</param>
+		inline bool check_mode_none() const { return check_mode() == none; }
+
+		/// <summary>
+		/// Logger will use global mode instead of its personal mode.
+		/// </summary>
+		inline void use_global_mode() { m_use_global_mode = true; }
+
+		/// <summary>
+		/// Logger will use its personal mode instead of global mode.
+		/// </summary>
+		inline void ignore_global_mode() { m_use_global_mode = false; }
+
+		/// <summary>
+		/// Set logger mode.
+		/// </summary>
+		/// <param name="_mode"></param>
+		inline void set_mode(enm_mode _mode) { m_mode = _mode; }
+
+		/// <summary>
+		/// No output.
+		/// </summary>
+		inline void set_mode_none(enm_mode _mode) { m_mode = none; }
+
+		/// <summary>
+		/// Output to console.
+		/// </summary>
+		inline void set_mode_console(enm_mode _mode) { m_mode = console; }
+
+		/// <summary>
+		/// Output to file.
+		/// </summary>
+		inline void set_mode_file(enm_mode _mode) { m_mode = file; }
+
+		/// <summary>
+		/// Output to console and file.
+		/// </summary>
+		inline void set_mode_both(enm_mode _mode) { m_mode = both; }
 
 		/// <summary>
 		/// Check if the mode of this logger is none.
@@ -89,139 +197,128 @@ namespace owd
 		/// <returns></returns>
 		inline std::wstring_view get_filepath() const { return m_filepath; }
 
-		template<class T>
-		c_logger& operator<<(const T& _output);
+		//template<class T>
+		//c_logger& operator<<(T _output);
 
 		c_logger& operator<<(std::wstring_view _output);
-		
-		std::wstring m_wstr_buffer;
 
-		inline c_logger& operator<<(std::string_view _output)
+		c_logger& operator<<(char _output);
+		c_logger& operator<<(wchar_t _output);
+
+		c_logger& operator<<(const char* _output);
+		c_logger& operator<<(const wchar_t* _output);
+
+		inline c_logger& operator<<(uint8_t  _output)
 		{
-			return this->operator<<(std::wstring_view(convert_utf8_to_utf16(_output)));
+			return check_mode_none() ? *this : (*this) << std::to_wstring(_output);
 		}
-		inline c_logger& operator<<(wchar_t _output)
+		inline c_logger& operator<<(uint16_t _output)
 		{
-			return (*this) << std::wstring_view{ &_output };
+			return check_mode_none() ? *this : (*this) << std::to_wstring(_output);
 		}
-		inline c_logger& operator<<(const wchar_t* _output)
+		inline c_logger& operator<<(uint32_t _output)
 		{
-			return (*this) << std::wstring_view{ _output };
+			return check_mode_none() ? *this : (*this) << std::to_wstring(_output);
 		}
-		inline c_logger& operator<<(char _output)
+		inline c_logger& operator<<(uint64_t _output)
 		{
-			return (*this) << std::string_view{ &_output };
+			return check_mode_none() ? *this : (*this) << std::to_wstring(_output);
 		}
-		inline c_logger& operator<<(const char* _output)
+
+		inline c_logger& operator<<(int8_t  _output)
 		{
-			return (*this) << std::string_view{ _output };
+			return check_mode_none() ? *this : (*this) << std::to_wstring(_output);
 		}
+		inline c_logger& operator<<(int16_t _output)
+		{
+			return check_mode_none() ? *this : (*this) << std::to_wstring(_output);
+		}
+		inline c_logger& operator<<(int32_t _output)
+		{
+			return check_mode_none() ? *this : (*this) << std::to_wstring(_output);
+		}
+		inline c_logger& operator<<(int64_t _output)
+		{
+			return check_mode_none() ? *this : (*this) << std::to_wstring(_output);
+		}
+
+		inline c_logger& operator<<(float _output)
+		{
+			return check_mode_none() ? *this : (*this) << std::to_wstring(_output);
+		}
+		inline c_logger& operator<<(double _output)
+		{
+			return check_mode_none() ? *this : (*this) << std::to_wstring(_output);
+		}
+
+
+		//c_logger& operator<<(std::wstring_view _output);
+		
+		//bool is_endl() const;
+
+		//inline c_logger& operator<<(std::string_view _output)
+		//{
+		//	return check_mode_none() ? *this : this->operator<<(std::wstring_view(convert_utf8_to_utf16(_output)));
+		//}
+		//inline c_logger& operator<<(wchar_t _output)
+		//{
+		//	return  check_mode_none() ? *this : (*this) << std::wstring_view{ &_output };
+		//}
+		//inline c_logger& operator<<(const wchar_t* _output)
+		//{
+		//	return  check_mode_none() ? *this : (*this) << std::wstring_view{ _output };
+		//}
+		//inline c_logger& operator<<(char _output)
+		//{
+		//	return  check_mode_none() ? *this : (*this) << std::string_view{ &_output };
+		//}
+		//inline c_logger& operator<<(const char* _output)
+		//{
+		//	return  check_mode_none() ? *this : (*this) << std::string_view{ _output };
+		//}
 
 	protected:
+		bool m_use_global_mode;
+
+		static enm_mode m_global_mode;
+
 		enm_mode m_mode;
 		
 		std::wstring m_filepath;
 
 		bool m_new_line;
 
-		void update_new_line(std::wstring_view _output);
+		std::wstring m_line;
 
-		template<class T>
-		void print_to_console(const T& _output);
-
-		template<class T>
-		void print_to_file(const T& _output);
-
-		template<class T>
-		void print_to_both(const T& _output);
-
-		template<class T>
-		inline void append_to_file_(const T& _output) { append_to_file(_output, m_filepath); }
-
-		void print_to_console(std::wstring_view _output);
-
-		void print_to_file(std::wstring_view _output);
+		std::wstring new_line_prompt();
 		
+		void update_new_line(std::wstring_view _output);
+		
+		std::wstring line(std::wstring_view _output)
+		{
+			std::wstring result{};
+
+			if (m_new_line)
+			{
+				result.append(new_line_prompt());
+				result.append(_output);
+
+				m_new_line = false;
+			}
+			else
+			{
+				result = _output;
+			}
+
+			return result;
+		}
+
+		inline void print_to_console(std::wstring_view _output) { std::wcout << line(_output); }
+		inline void print_to_file   (std::wstring_view _output) { append_to_file(line(_output), m_filepath); }
+
 		void print_to_both(std::wstring_view _output);
 
-		inline void append_to_file_(std::wstring_view _output) { append_to_file(_output, m_filepath); }
-
-		inline void print_to_console(std::string_view _output) { print_to_console(convert_utf8_to_utf16(_output)); }
-
-		inline void print_to_file(std::string_view _output) { print_to_file(convert_utf8_to_utf16(_output)); }
-
-		inline void print_to_both(std::string_view _output) { print_to_both(convert_utf8_to_utf16(_output)); }
-
-		inline void append_to_file_(std::string_view _output) { append_to_file_(convert_utf8_to_utf16(_output)); }
 	};
 
-	template<class T>
-	c_logger& c_logger::operator<<(const T& _output)
-	{
-		switch (m_mode)
-		{
-		case console:
-			print_to_console(_output);
-			break;
-
-		case file:
-			print_to_file(_output);
-			break;
-
-		case both:
-			print_to_both(_output);
-			break;
-
-		case none:
-		default:
-			break;
-		}
-
-		return *this;
-	}
-	template<class T>
-	void c_logger::print_to_console(const T& _output)
-	{
-		if (m_new_line)
-		{
-			std::wcout << '[' << current_time_date_wstr() << L"]; " << _output;
-		}
-		else
-		{
-			std::wcout << _output;
-		}
-	}
-	template<class T>
-	void c_logger::print_to_file(const T& _output)
-	{
-		if (m_new_line)
-		{
-			append_to_file_('[');
-			append_to_file_(current_time_date_wstr());
-			append_to_file_(L"]; ");
-			append_to_file_(_output);
-		}
-		else
-		{
-			append_to_file_(_output);
-		}
-	}
-	template<class T>
-	void c_logger::print_to_both(const T& _output)
-	{
-		if (m_new_line)
-		{
-			std::wcout << '[' << current_time_date_wstr() << L"]; " << _output;
-			append_to_file_('[');
-			append_to_file_(current_time_date_wstr());
-			append_to_file_(L"]; ");
-			append_to_file_(_output);
-		}
-		else
-		{
-			std::wcout << _output;
-			append_to_file_(_output);
-		}
-	}
 } // namespace owd
 
