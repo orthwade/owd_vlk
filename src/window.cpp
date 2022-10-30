@@ -31,10 +31,14 @@ namespace owd
 
     void c_window::terminate()
     {
-        close();
-        glfwTerminate();
         if (m_singleton)
         {
+            m_list_singleton.remove(m_singleton);
+
+            m_singleton->close();
+
+            glfwTerminate();
+
             delete m_singleton;
             m_singleton = nullptr;
         }
@@ -42,6 +46,7 @@ namespace owd
 
     c_window::c_window()
         :
+        c_singleton(),
         m_glfw_init_result(),
         m_glfw_wnd()
     {

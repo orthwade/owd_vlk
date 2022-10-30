@@ -19,5 +19,7 @@ int main(int32_t arg_count, char *args[])
 
     app_.terminate();
 
+    c_singleton::terminate_all_singletons();
+
     return 0;
 }

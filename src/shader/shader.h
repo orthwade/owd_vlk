@@ -62,7 +62,7 @@ namespace owd
     /// Singleton class used to handle GLSL shaders.
     /// set_shader_folder_path has to be called before other methods.
     /// </summary>
-    class c_shaders
+    class c_shaders : public c_singleton
     {
     public:
         using ptr = std::shared_ptr<c_shader>;
@@ -93,7 +93,7 @@ namespace owd
 
         /// @brief Delete singleton.
         /// get() will be required to use this class further.
-        void terminate();
+        void terminate() override;
 
     protected:
         c_shader::ptr m_vertex_shader;

@@ -23,6 +23,8 @@ namespace owd
 	{
 		if (m_singleton)
 		{
+			m_list_singleton.remove(m_singleton);
+
 			delete m_singleton;
 			m_singleton = nullptr;
 		}
@@ -30,6 +32,8 @@ namespace owd
 
 	c_shaders::c_shaders()
 		:
+		c_singleton(),
+
 		m_shader_folder_path(shader_folder_path_),
 
 		m_vertex_shader_filename  (vertex_shader_filename_),

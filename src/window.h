@@ -8,6 +8,8 @@
 
 #include <GLFW/glfw3.h>
 
+#include "owd_lib/owd_lib.h"
+
 namespace owd
 {
     struct s_wnd_hint
@@ -17,7 +19,7 @@ namespace owd
     };
 
     /// @brief Singleton GLFW Window class used to handle window options.
-    class c_window
+    class c_window : public c_singleton
     {
     public:
         /// <summary>
@@ -60,7 +62,7 @@ namespace owd
 
         /// @brief Close window, terminate GLFW and delete singleton. 
         /// get() will be required to use this class further.
-        void terminate();
+        void terminate() override;
 
         /// @brief Get GLFW window raw pointer.
         /// @return

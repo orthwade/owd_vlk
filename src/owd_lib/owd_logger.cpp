@@ -7,7 +7,7 @@ namespace owd
 
     const std::wstring c_logger::logger_folder_path{ current_path_str_ + L"/logger/" };
 
-	const std::locale utf8_locale_ = std::locale(std::locale(), new std::codecvt_utf8<wchar_t>());
+	static const std::locale utf8_locale_ = std::locale(std::locale(), new std::codecvt_utf8<wchar_t>());
 
     c_logger::enm_mode c_logger::m_global_mode{ c_logger::none };
 

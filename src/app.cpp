@@ -11,6 +11,8 @@ namespace owd
     { 
         if (m_singleton)
         {
+            m_list_singleton.remove(m_singleton);
+
             delete m_singleton;
             m_singleton = nullptr;
         }
@@ -18,6 +20,7 @@ namespace owd
 
     c_app::c_app()
         :
+        c_singleton(),
         m_shaders(c_shaders::get_ptr()),
         m_window(c_window::get_ptr())
     {

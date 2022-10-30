@@ -1,11 +1,12 @@
 #pragma once
+#include "owd_lib/owd_lib.h"
 #include "window.h"
 #include "shader/shader.h"
 
 namespace owd
 {
     /// @brief Singleton class of application.
-    class c_app
+    class c_app : public c_singleton
     {
         public:
         /// <summary>
@@ -25,7 +26,7 @@ namespace owd
         /// Terminate the app. Close the window, terminate GLFW and delete this class singleton object.
         /// get() will be required to use this class further.
         /// </summary>
-        void terminate();
+        void terminate() override;
 
         /// <summary>
         /// Get reference to window.
