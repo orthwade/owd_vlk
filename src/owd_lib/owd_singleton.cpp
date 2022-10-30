@@ -6,21 +6,24 @@ namespace owd
 
 	void c_singleton::terminate_all_singletons()
 	{
-		if (m_list_singleton.size() > 0)
+		if (!m_list_singleton.empty())
 		{
-
-			for (c_singleton* singleton : m_list_singleton)
+			while (true)
 			{
-				if (singleton)
-					singleton->terminate();
-
 				if (m_list_singleton.empty())
 				{
 					break;
 				}
+				else
+				{
+					c_singleton* singleton = m_list_singleton.back();
+					if (singleton)
+					{
+						singleton->terminate();
+					}
+				}
 			}
 		}
-		
 	}
 	c_singleton::c_singleton()
 	{

@@ -1,4 +1,5 @@
 #include "app.h"
+#include "glfw_error.h"
 
 using namespace std;
 using namespace owd;
@@ -18,6 +19,7 @@ int main(int32_t arg_count, char *args[])
     //app_.run();
 
     app_.terminate();
+    c_glfw_errors* errors_ = c_glfw_errors::get_ptr();
 
     c_singleton::terminate_all_singletons();
 

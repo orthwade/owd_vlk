@@ -1,4 +1,3 @@
-#include "glfw_init.h"
 #include "glfw_error.h"
 
 namespace owd
@@ -207,29 +206,28 @@ namespace owd
 
 	c_glfw_errors::c_glfw_errors()
 		:
-		c_singleton(),
-		m_vec_error
+		m_map_error
 		(
 			{
-				GLFW_NO_ERROR,
-				GLFW_NOT_INITIALIZED,
-				GLFW_NO_CURRENT_CONTEXT,
-				GLFW_INVALID_ENUM,
-				GLFW_INVALID_VALUE,
-				GLFW_OUT_OF_MEMORY,
-				GLFW_API_UNAVAILABLE,
-				GLFW_VERSION_UNAVAILABLE,
-				GLFW_PLATFORM_ERROR,
-				GLFW_FORMAT_UNAVAILABLE,
-				GLFW_NO_WINDOW_CONTEXT,
-				GLFW_CURSOR_UNAVAILABLE,
-				GLFW_CURSOR_UNAVAILABLE,
-				GLFW_FEATURE_UNIMPLEMENTED,
-				GLFW_PLATFORM_UNAVAILABLE
+				{ GLFW_NO_ERROR,			  c_glfw_error{ GLFW_NO_ERROR				}},
+				{ GLFW_NOT_INITIALIZED,		  c_glfw_error{ GLFW_NOT_INITIALIZED		}},
+				{ GLFW_NO_CURRENT_CONTEXT,	  c_glfw_error{ GLFW_NO_CURRENT_CONTEXT		}},
+				{ GLFW_INVALID_ENUM,		  c_glfw_error{ GLFW_INVALID_ENUM			}},
+				{ GLFW_INVALID_VALUE,		  c_glfw_error{ GLFW_INVALID_VALUE			}},
+				{ GLFW_OUT_OF_MEMORY,		  c_glfw_error{ GLFW_OUT_OF_MEMORY			}},
+				{ GLFW_API_UNAVAILABLE,		  c_glfw_error{ GLFW_API_UNAVAILABLE		}},
+				{ GLFW_VERSION_UNAVAILABLE,	  c_glfw_error{ GLFW_VERSION_UNAVAILABLE	}},
+				{ GLFW_PLATFORM_ERROR,		  c_glfw_error{ GLFW_PLATFORM_ERROR			}},
+				{ GLFW_FORMAT_UNAVAILABLE,	  c_glfw_error{ GLFW_FORMAT_UNAVAILABLE		}},
+				{ GLFW_NO_WINDOW_CONTEXT,	  c_glfw_error{ GLFW_NO_WINDOW_CONTEXT		}},
+				{ GLFW_CURSOR_UNAVAILABLE,	  c_glfw_error{ GLFW_CURSOR_UNAVAILABLE		}},
+				{ GLFW_CURSOR_UNAVAILABLE,	  c_glfw_error{ GLFW_CURSOR_UNAVAILABLE		}},
+				{ GLFW_FEATURE_UNIMPLEMENTED, c_glfw_error{ GLFW_FEATURE_UNIMPLEMENTED	}},
+				{ GLFW_PLATFORM_UNAVAILABLE,  c_glfw_error{ GLFW_PLATFORM_UNAVAILABLE	}}
 			}
 		)
 	{
-
+		m_list_singleton.push_back(this);
 	}
 	void c_glfw_errors::terminate()
 	{

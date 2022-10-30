@@ -1,6 +1,7 @@
 #pragma once 
 #include <vector>
 #include <string_view>
+#include <unordered_map>
 
 namespace owd
 {
@@ -9,4 +10,7 @@ namespace owd
 
 	typedef std::wstring_view wsv_t;
 
+	template<class T1, class T2>
+	using umap_t = std::unordered_map<T1, T2>;
+	
 } // namespace owd

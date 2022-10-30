@@ -81,6 +81,8 @@ namespace owd
         inline static c_glfw_errors* const get_ptr() 
         { return m_singleton ? m_singleton : (m_singleton = new c_glfw_errors); }
 
+        //const std::vector& get
+
         /// <summary>
         /// Delete this class singleton object.
         /// get() will be required to use this class further.
@@ -95,7 +97,7 @@ namespace owd
         c_glfw_errors(const c_glfw_errors&) = delete;
         c_glfw_errors& operator=(const c_glfw_errors&) = delete;
 
-        const std::vector<c_glfw_error> m_vec_error;
+        std::unordered_map<int32_t, c_glfw_error> m_map_error;
     };
 
    
