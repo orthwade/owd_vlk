@@ -1,4 +1,3 @@
-#include <codecvt>
 #include "owd_string.h"
 
 namespace owd

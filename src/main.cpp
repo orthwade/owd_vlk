@@ -5,9 +5,15 @@ using namespace owd;
 
 int main(int32_t arg_count, char *args[])
 {
+    c_logger::ptr logger_ptr_ = c_logger::make(L"ֻמדדונ", c_logger::both);
+
+    c_logger& logger_ = *logger_ptr_;
+
+    logger_ << "" << "1111" << L"פגכאûששמא\n" << L"q34rq3f\n" << L"װÛגשכפײÙֻכג\n";
+    
     c_app& app_ = c_app::get();
 
-    app_.run();
+    //app_.run();
 
     app_.terminate();
 
@@ -24,7 +30,7 @@ int main(int32_t arg_count, char *args[])
 
     std::wcout << w_str_5_ << '\n';
     std::wcout << w_str_2_ << '\n';
-    std::cout << str_2_ << '\n';
+    //std::cout << str_2_ << '\n';
     std::wcout << w_str_2_ << '\n';
 
     return 0;

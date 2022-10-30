@@ -1,14 +1,53 @@
 #pragma once 
 #include <fstream>
 #include <filesystem>
+#include <locale>
 
 #include "owd_define.h"
 #include "owd_object.h"
+#include "owd_string.h"
 
 namespace owd
 {
 	static const std::filesystem::path current_path_{ std::filesystem::current_path() };
 	static const std::wstring current_path_str_{ current_path_.wstring() };
+
+	const std::locale utf8_locale_ = std::locale(std::locale(), new std::codecvt_utf8<wchar_t>());
+
+	/// <summary>
+	/// Append text to textfile.
+	/// </summary>
+	/// <param name="_text"></param>
+	/// <param name="_filepath"></param>
+	/// <returns></returns>
+	bool append_to_file(std::wstring_view _text, std::wstring_view _filepath);
+
+	/// <summary>
+	/// Append output to textfile.
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	/// <param name="_output"></param>
+	/// <param name="_filepath"></param>
+	/// <returns></returns>
+	template<class T>
+	bool append_to_file(const T& _output, std::wstring_view _filepath)
+	{
+		bool result = false;
+
+		std::wofstream ofstream_{ _filepath.data(), std::ios_base::app };
+
+		if (ofstream_)
+		{
+			ofstream_ << _output;
+
+			if (!ofstream_.bad())
+			{
+				result = true;
+			}
+		}
+
+		return result;
+	}
 
 	/// <summary>
 	/// Class of binary file.

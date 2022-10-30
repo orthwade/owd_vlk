@@ -58,5 +58,27 @@ namespace owd
 
 		ofstream_.write(reinterpret_cast<const char*>(m_vec_byte.data()), m_vec_byte.size());
 	}
-	
+
+	bool append_to_file(std::wstring_view _text, std::wstring_view _filepath)
+	{
+		bool result = false;
+
+
+		std::wofstream ofstream_{ _filepath.data(), std::ios_base::app};
+
+		ofstream_.imbue(utf8_locale_);
+
+		if (ofstream_)
+		{
+			ofstream_ << _text;
+
+			if (!ofstream_.bad())
+			{
+				result = true;
+			}
+		}
+		
+		return result;
+	}
+
 } // namespace owd

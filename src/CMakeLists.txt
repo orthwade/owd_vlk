@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 17)
 
 project(owd_vlk)
 
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/logger)
+
 find_package(Vulkan REQUIRED)
 
 SET(GCC_COVERAGE_LINK_FLAGS 
@@ -25,8 +27,8 @@ message(STATUS ${Vulkan_LIBRARIES})
 set(VULKAN_LIB_LIST "vulkan-1")
 
 add_executable(${PROJECT_NAME}
-glfw_error.h glfw_error.cpp
-glfw_init.h  glfw_init.cpp  
+#glfw_error.h glfw_error.cpp
+#glfw_init.h  glfw_init.cpp  
 window.h     window.cpp
 monitor.h    monitor.cpp
 app.h	     app.cpp
