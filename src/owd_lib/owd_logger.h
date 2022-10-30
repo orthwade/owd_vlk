@@ -1,7 +1,8 @@
 #pragma once 
 #include <iostream>
+#include <filesystem>
 
-#include "owd_filesystem.h"
+//#include "owd_filesystem.h"
 #include "owd_time.h"
 #include "owd_output.h"
 
@@ -11,7 +12,7 @@ namespace owd
 	/// Class of logger. This logger uses operator<< to output to console and/or file.
 	/// Every new line will have time, date and logger name in the beggining.
 	/// </summary>
-	class c_logger : public c_object
+	class c_logger
 	{
 	public:
 		using ptr = std::shared_ptr<c_logger>;
@@ -47,22 +48,22 @@ namespace owd
 		/// <summary>
 		/// No output.
 		/// </summary>
-		inline void static set_global_mode_none(enm_mode _global_mode) { m_global_mode = none; }
+		inline void static set_global_mode_none() { m_global_mode = none; }
 
 		/// <summary>
 		/// Output to console.
 		/// </summary>
-		inline void static set_global_mode_console(enm_mode _global_mode) { m_global_mode = console; }
+		inline void static set_global_mode_console() { m_global_mode = console; }
 
 		/// <summary>
 		/// Output to file.
 		/// </summary>
-		inline void static set_global_mode_file(enm_mode _global_mode) { m_global_mode = file; }
+		inline void static set_global_mode_file() { m_global_mode = file; }
 
 		/// <summary>
 		/// Output to console and file.
 		/// </summary>
-		inline void static set_global_mode_both(enm_mode _global_mode) { m_global_mode = both; }
+		inline void static set_global_mode_both() { m_global_mode = both; }
 
 		/// <summary>
 		/// Check if the global_mode of this logger is none.
@@ -150,22 +151,22 @@ namespace owd
 		/// <summary>
 		/// No output.
 		/// </summary>
-		inline void set_mode_none(enm_mode _mode) { m_mode = none; }
+		inline void set_mode_none() { m_mode = none; }
 
 		/// <summary>
 		/// Output to console.
 		/// </summary>
-		inline void set_mode_console(enm_mode _mode) { m_mode = console; }
+		inline void set_mode_console() { m_mode = console; }
 
 		/// <summary>
 		/// Output to file.
 		/// </summary>
-		inline void set_mode_file(enm_mode _mode) { m_mode = file; }
+		inline void set_mode_file() { m_mode = file; }
 
 		/// <summary>
 		/// Output to console and file.
 		/// </summary>
-		inline void set_mode_both(enm_mode _mode) { m_mode = both; }
+		inline void set_mode_both() { m_mode = both; }
 
 		/// <summary>
 		/// Check if the mode of this logger is none.
@@ -197,8 +198,17 @@ namespace owd
 		/// <returns></returns>
 		inline std::wstring_view get_filepath() const { return m_filepath; }
 
-		//template<class T>
-		//c_logger& operator<<(T _output);
+		/// <summary>
+		/// Set logger name.
+		/// </summary>
+		void set_name(std::wstring_view _name) { m_name = _name; }
+
+		/// <summary>
+		/// Get logger name.
+		/// </summary>
+		/// <param name="_output"></param>
+		/// <returns></returns>
+		std::wstring_view get_name() const { return m_name; }
 
 		c_logger& operator<<(std::wstring_view _output);
 
@@ -251,33 +261,9 @@ namespace owd
 			return check_mode_none() ? *this : (*this) << std::to_wstring(_output);
 		}
 
-
-		//c_logger& operator<<(std::wstring_view _output);
-		
-		//bool is_endl() const;
-
-		//inline c_logger& operator<<(std::string_view _output)
-		//{
-		//	return check_mode_none() ? *this : this->operator<<(std::wstring_view(convert_utf8_to_utf16(_output)));
-		//}
-		//inline c_logger& operator<<(wchar_t _output)
-		//{
-		//	return  check_mode_none() ? *this : (*this) << std::wstring_view{ &_output };
-		//}
-		//inline c_logger& operator<<(const wchar_t* _output)
-		//{
-		//	return  check_mode_none() ? *this : (*this) << std::wstring_view{ _output };
-		//}
-		//inline c_logger& operator<<(char _output)
-		//{
-		//	return  check_mode_none() ? *this : (*this) << std::string_view{ &_output };
-		//}
-		//inline c_logger& operator<<(const char* _output)
-		//{
-		//	return  check_mode_none() ? *this : (*this) << std::string_view{ _output };
-		//}
-
 	protected:
+		std::wstring m_name;
+
 		bool m_use_global_mode;
 
 		static enm_mode m_global_mode;
@@ -294,29 +280,13 @@ namespace owd
 		
 		void update_new_line(std::wstring_view _output);
 		
-		std::wstring line(std::wstring_view _output)
-		{
-			std::wstring result{};
+		std::wstring line(std::wstring_view _output);
 
-			if (m_new_line)
-			{
-				result.append(new_line_prompt());
-				result.append(_output);
-
-				m_new_line = false;
-			}
-			else
-			{
-				result = _output;
-			}
-
-			return result;
-		}
+		bool append_to_file(std::wstring_view _text, std::wstring_view _filepath);
 
 		inline void print_to_console(std::wstring_view _output) { std::wcout << line(_output); }
 		inline void print_to_file   (std::wstring_view _output) { append_to_file(line(_output), m_filepath); }
-
-		void print_to_both(std::wstring_view _output);
+		void        print_to_both   (std::wstring_view _output);
 
 	};
 

@@ -2,13 +2,18 @@
 
 namespace owd
 {
+	static const std::filesystem::path current_path_{ std::filesystem::current_path() };
+	static const std::wstring current_path_str_{ current_path_.wstring() };
+
     const std::wstring c_logger::logger_folder_path{ current_path_str_ + L"/logger/" };
+
+	const std::locale utf8_locale_ = std::locale(std::locale(), new std::codecvt_utf8<wchar_t>());
 
     c_logger::enm_mode c_logger::m_global_mode{ c_logger::none };
 
     c_logger::c_logger(std::wstring_view _name, enm_mode _mode, bool _use_global_mode)
         :
-        c_object(_name),
+        m_name(_name),
         m_use_global_mode(_use_global_mode),
         m_mode(_mode),
         m_new_line(true),
@@ -39,6 +44,46 @@ namespace owd
 				m_new_line = true;
 			}
 		}
+	}
+
+	std::wstring c_logger::line(std::wstring_view _output)
+	{
+		std::wstring result{};
+
+		if (m_new_line)
+		{
+			result.append(new_line_prompt());
+			result.append(_output);
+
+			m_new_line = false;
+		}
+		else
+		{
+			result = _output;
+		}
+
+		return result;
+	}
+
+	bool c_logger::append_to_file(std::wstring_view _text, std::wstring_view _filepath)
+	{
+		bool result = false;
+
+		std::wofstream ofstream_{ _filepath.data(), std::ios_base::app };
+
+		ofstream_.imbue(utf8_locale_);
+
+		if (ofstream_)
+		{
+			ofstream_ << _text;
+
+			if (!ofstream_.bad())
+			{
+				result = true;
+			}
+		}
+
+		return result;
 	}
 
 	void c_logger::print_to_both(std::wstring_view _output)
@@ -86,6 +131,7 @@ namespace owd
 		{
 			std::string  str_ { _output };
 			std::wstring wstr_{ convert_utf8_to_utf16(str_) };
+
 			switch (mode)
 			{
 			case console:
