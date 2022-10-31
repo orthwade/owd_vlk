@@ -8,12 +8,14 @@
 
 #include <GLFW/glfw3.h>
 
+#include "owd_lib/owd_lib.h"
+
 namespace owd
 {
     /// <summary>
     /// Class of monitor info.
     /// </summary>
-    class c_glfw_init
+    class c_glfw_init : public c_singleton
     {
     public:
         /// <summary>
@@ -39,7 +41,7 @@ namespace owd
 
         /// @brief Terminate GLFW. Delete singleton. 
         /// get() will be required to use this class further.
-        void terminate();
+        void terminate() override;
 
     protected:
         /// <summary>

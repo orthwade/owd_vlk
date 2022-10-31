@@ -17,6 +17,7 @@ namespace owd
 				else
 				{
 					c_singleton* singleton = m_list_singleton.back();
+
 					if (singleton)
 					{
 						singleton->terminate();
@@ -25,6 +26,7 @@ namespace owd
 			}
 		}
 	}
+
 	c_singleton::c_singleton()
 	{
 		m_list_singleton.push_back(this);

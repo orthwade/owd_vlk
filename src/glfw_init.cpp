@@ -6,9 +6,12 @@ namespace owd
 
 	void c_glfw_init::terminate()
 	{
-		glfwTerminate();
 		if (m_singleton)
 		{
+			m_list_singleton.remove(m_singleton);
+
+			glfwTerminate();
+
 			delete m_singleton;
 			m_singleton = nullptr;
 		}
@@ -16,9 +19,9 @@ namespace owd
 
 	c_glfw_init::c_glfw_init()
 		:
+		c_singleton(),
 		m_glfw_init_result(glfwInit())
 	{
 	}
 
-	static c_glfw_init& glfw_init_ = c_glfw_init::get();
 } // namespace owd

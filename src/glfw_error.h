@@ -1,8 +1,9 @@
 #pragma once
-#include <GLFW/glfw3.h>
 #include <unordered_map>
+#include <mutex>
 
 #include "owd_lib/owd_lib.h"
+#include "glfw_init.h"
 
 namespace owd
 {
@@ -81,7 +82,17 @@ namespace owd
         inline static c_glfw_errors* const get_ptr() 
         { return m_singleton ? m_singleton : (m_singleton = new c_glfw_errors); }
 
-        //const std::vector& get
+        const umap_t<int32_t, c_glfw_error>& get_map_error() const { return m_map_error; }
+
+        /// <summary>
+        /// Print full error info with given error integer code.
+        /// </summary>
+        void print_error(int32_t _error_code);
+
+        /// <summary>
+        /// Print full error info of the last error.
+        /// </summary>
+        void print_last_error();
 
         /// <summary>
         /// Delete this class singleton object.
@@ -90,6 +101,10 @@ namespace owd
         void terminate() override;
 
     protected:
+        c_glfw_init* m_glfw_init;
+
+        c_logger m_logger;
+
         c_glfw_errors();
 
         static c_glfw_errors* m_singleton;
@@ -97,7 +112,7 @@ namespace owd
         c_glfw_errors(const c_glfw_errors&) = delete;
         c_glfw_errors& operator=(const c_glfw_errors&) = delete;
 
-        std::unordered_map<int32_t, c_glfw_error> m_map_error;
+        const umap_t<int32_t, c_glfw_error> m_map_error;
     };
 
    
