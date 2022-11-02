@@ -20,7 +20,8 @@ namespace owd
         c_singleton(),
         m_glfw_errors(c_glfw_errors::get_ptr()),
         m_shaders(c_shaders::get_ptr()),
-        m_window(c_window::get_ptr())
+        m_window(c_window::get_ptr()),
+        m_vulkan_instance(&c_vulkan_instance::init())
     {
         c_glfw_init::init();
         m_window->init();

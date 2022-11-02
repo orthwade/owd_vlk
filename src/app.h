@@ -4,6 +4,7 @@
 #include "glfw_init.h"
 #include "window.h"
 #include "shader/shader.h"
+#include "vulkan_instance.h"
 
 namespace owd
 {
@@ -48,6 +49,8 @@ namespace owd
         c_window* m_window;
 
         c_shaders* m_shaders;
+
+        c_vulkan_instance* m_vulkan_instance;
 
         c_app();
         ~c_app();

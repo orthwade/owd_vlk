@@ -22,13 +22,13 @@ namespace owd
         /// Init GLFW and get
         /// </summary>
         /// <returns></returns>
-        inline static bool init() { return m_glfw_init_result = (glfwInit() == GLFW_TRUE) ? true : false; }
+        inline static bool init() { return m_is_initialzed = (glfwInit() == GLFW_TRUE) ? true : false; }
 
         /// <summary>
         /// Get GLFW init result int code.
         /// </summary>
         /// <returns></returns>
-        inline static bool get_init_result_int() { return m_glfw_init_result; }
+        inline static bool is_initialized() { return m_is_initialzed; }
 
         /// <summary>
         /// Terminate GLFW.
@@ -38,7 +38,7 @@ namespace owd
     protected:
         c_glfw_init() = delete;
 
-        static bool m_glfw_init_result;
+        static bool m_is_initialzed;
     };
 
    
