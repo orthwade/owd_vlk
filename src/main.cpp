@@ -13,21 +13,13 @@ int main(int32_t arg_count, char *args[])
 
     c_app& app_ = c_app::get();
     
-    glfwPlatformSupported(188888);
     c_glfw_errors& errors_ = c_glfw_errors::get();
 
-    //errors_.print_last_error();
-    //app_.run();
-    glfwWindowHint(2, 99);
+    app_.run();
 
     app_.terminate();
    
-    //auto& m = c_glfw_init::get();
-   
-
     c_singleton::terminate_all_singletons();
 
-
-    glfwCreateStandardCursor(1);
     return 0;
 }

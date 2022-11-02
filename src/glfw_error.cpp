@@ -208,13 +208,12 @@ check whether a specific platform is supported by a library binary."
 	{
 		c_glfw_errors* glfw_errors_ = c_glfw_errors::get_ptr();
 
-		glfw_errors_->print_error(_code);
+		glfw_errors_->error_callback(_code);
 	}
 	
 	c_glfw_errors::c_glfw_errors()
 		:
 		c_singleton(),
-		m_glfw_init(c_glfw_init::get_ptr()),
 		m_logger(L"glfw_errors"),
 		m_map_error
 		(
@@ -240,6 +239,20 @@ check whether a specific platform is supported by a library binary."
 		glfwSetErrorCallback(static_glfw_error_callback);
 	}
 
+	void c_glfw_errors::error_callback(int32_t _error_code)
+	{
+		std::mutex mtx_{};
+		std::lock_guard lg_{ mtx_ };
+
+		const c_glfw_error& error_{ m_map_error.at(_error_code) };
+
+		m_logger
+			<< L"GLFW error callback:\n"
+			<< L"Name: " << error_.get_name() << L";\n"
+			<< L"Description: " << error_.get_info() << L";\n"
+			<< L"Analysis: " << error_.get_analysis() << L'\n';
+	}
+
 	void c_glfw_errors::print_error(int32_t _error_code)
 	{
 		std::mutex mtx_{};
@@ -248,16 +261,24 @@ check whether a specific platform is supported by a library binary."
 		const c_glfw_error& error_{ m_map_error.at(_error_code) };
 
 		m_logger
-			<< L"Last error:\n"
-			<< L"Name: " << error_.get_name() << L";\n"
-			<< L"Description: " << error_.get_info() << L";\n"
-			<< L"Analysis: " << error_.get_analysis() << L'\n';
-		glfwGetError(nullptr);
+			<< L"GLFW error:\n"
+			<< L"Name: "		<< error_.get_name()	 << L";\n"
+			<< L"Description: "	<< error_.get_info()	 << L";\n"
+			<< L"Analysis: "	<< error_.get_analysis() << L'\n';
 	}
 
 	void c_glfw_errors::print_last_error()
 	{
-		print_error(glfwGetError(nullptr));
+		std::mutex mtx_{};
+		std::lock_guard lg_{ mtx_ };
+
+		const c_glfw_error& error_{ m_map_error.at(glfwGetError(nullptr)) };
+
+		m_logger
+			<< L"GLFW last error:\n"
+			<< L"Name: " << error_.get_name() << L";\n"
+			<< L"Description: " << error_.get_info() << L";\n"
+			<< L"Analysis: " << error_.get_analysis() << L'\n';
 	}
 
 	void c_glfw_errors::terminate()

@@ -13,45 +13,32 @@
 namespace owd
 {
     /// <summary>
-    /// Class of monitor info.
+    /// Static method only class to init or terminate GLFW.
     /// </summary>
     class c_glfw_init : public c_singleton
     {
     public:
         /// <summary>
-        /// Create singleton object and init GLFW, if not created already. 
-        /// Get reference to single instance of this class object.
+        /// Init GLFW and get
         /// </summary>
         /// <returns></returns>
-        inline static c_glfw_init& get() { return m_singleton ? *m_singleton : (*(m_singleton = new c_glfw_init)); }
-
-        /// <summary>
-        /// Create singleton object and init GLFW, if not created already. 
-        /// Get pointer to single instance of this class object.
-        /// </summary>
-        /// <returns></returns>
-        inline static c_glfw_init* const get_ptr() 
-        { return m_singleton ? m_singleton : (m_singleton = new c_glfw_init); }
+        inline static bool init() { return m_glfw_init_result = (glfwInit() == GLFW_TRUE) ? true : false; }
 
         /// <summary>
         /// Get GLFW init result int code.
         /// </summary>
         /// <returns></returns>
-        inline int32_t get_init_result_int() const { return m_glfw_init_result; }
+        inline static bool get_init_result_int() { return m_glfw_init_result; }
 
-        /// @brief Terminate GLFW. Delete singleton. 
-        /// get() will be required to use this class further.
-        void terminate() override;
+        /// <summary>
+        /// Terminate GLFW.
+        /// </summary>
+        static void terminate();
 
     protected:
-        /// <summary>
-        /// Create object and init GLFW.
-        /// </summary>
-        c_glfw_init();
+        c_glfw_init() = delete;
 
-        int32_t m_glfw_init_result;
-
-        static c_glfw_init* m_singleton;
+        static bool m_glfw_init_result;
     };
 
    

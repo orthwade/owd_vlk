@@ -4,9 +4,6 @@ namespace owd
 {
     c_app *c_app::m_singleton{};
 
-    /// <summary>
-    /// Terminate the app. Close the window, terminate GLFW and delete this class singleton object.
-    /// </summary>
     void c_app::terminate() 
     { 
         if (m_singleton)
@@ -21,15 +18,18 @@ namespace owd
     c_app::c_app()
         :
         c_singleton(),
+        m_glfw_errors(c_glfw_errors::get_ptr()),
         m_shaders(c_shaders::get_ptr()),
         m_window(c_window::get_ptr())
     {
+        c_glfw_init::init();
         m_window->init();
     }
 
     c_app::~c_app()
     {
         m_window->terminate();
+        c_glfw_init::terminate();
     }
 
 } //namespace owd

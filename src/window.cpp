@@ -9,19 +9,29 @@ namespace owd
     {
         glfwDestroyWindow(m_glfw_wnd);
 
-        m_glfw_init_result = glfwInit();
-
         for (const s_wnd_hint &hint_ : _vec_hint)
             glfwWindowHint(hint_.hint_id, hint_.value);
 
+        glfwSwapInterval(1);
+
         m_glfw_wnd = glfwCreateWindow(_w, _h, _name.data(), nullptr, nullptr);
+    }
+
+    void c_window::set_func_update_window(const std::function<void()>& _func)
+    {
+        m_func_update_window = _func;
+    }
+
+    void c_window::default_func_update_window()
+    {
+        glfwPollEvents();
     }
 
     void c_window::run()
     {
         while (!glfwWindowShouldClose(m_glfw_wnd))
         {
-            glfwPollEvents();
+            m_func_update_window();
         }
     }
 
@@ -47,7 +57,7 @@ namespace owd
     c_window::c_window()
         :
         c_singleton(),
-        m_glfw_init_result(),
+        m_func_update_window(std::bind(&c_window::default_func_update_window, this)),
         m_glfw_wnd()
     {
 

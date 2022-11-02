@@ -2,26 +2,11 @@
 
 namespace owd
 {
-	c_glfw_init* c_glfw_init::m_singleton{};
+	bool c_glfw_init::m_glfw_init_result{ false };
 
 	void c_glfw_init::terminate()
 	{
-		if (m_singleton)
-		{
-			m_list_singleton.remove(m_singleton);
-
-			glfwTerminate();
-
-			delete m_singleton;
-			m_singleton = nullptr;
-		}
+		glfwTerminate;
+		m_glfw_init_result = false;
 	}
-
-	c_glfw_init::c_glfw_init()
-		:
-		c_singleton(),
-		m_glfw_init_result(glfwInit())
-	{
-	}
-
 } // namespace owd

@@ -1,5 +1,7 @@
 #pragma once
 #include "owd_lib/owd_lib.h"
+#include "glfw_error.h"
+#include "glfw_init.h"
 #include "window.h"
 #include "shader/shader.h"
 
@@ -41,7 +43,10 @@ namespace owd
         inline c_shaders& get_shaders() { return *m_shaders; }
 
         protected:
+        c_glfw_errors* m_glfw_errors;
+
         c_window* m_window;
+
         c_shaders* m_shaders;
 
         c_app();

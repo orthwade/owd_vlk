@@ -3,6 +3,7 @@
 #include <string_view>
 #include <memory>
 #include <vector>
+#include <functional>
 
 #define GLFW_INCLUDE_VULKAN
 
@@ -49,6 +50,11 @@ namespace owd
                         { GLFW_RESIZABLE, GLFW_FALSE }
                     });
 
+        /// <summary>
+        /// Set window update function.
+        /// </summary>
+        void set_func_update_window(const std::function<void()>& _func);
+
         /// @brief Start updating window.
         void run();
 
@@ -71,7 +77,9 @@ namespace owd
     protected:
         c_window();
 
-        int32_t m_glfw_init_result;
+        std::function<void()> m_func_update_window;
+
+        void default_func_update_window();
 
         GLFWwindow* m_glfw_wnd;
         

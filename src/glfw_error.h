@@ -85,6 +85,11 @@ namespace owd
         const umap_t<int32_t, c_glfw_error>& get_map_error() const { return m_map_error; }
 
         /// <summary>
+        /// Error callback.
+        /// </summary>
+        void error_callback(int32_t _error_code);
+
+        /// <summary>
         /// Print full error info with given error integer code.
         /// </summary>
         void print_error(int32_t _error_code);
@@ -101,8 +106,6 @@ namespace owd
         void terminate() override;
 
     protected:
-        c_glfw_init* m_glfw_init;
-
         c_logger m_logger;
 
         c_glfw_errors();
