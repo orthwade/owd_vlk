@@ -8,6 +8,8 @@
 
 #include <GLFW/glfw3.h>
 
+#include "glfw_error.h"
+
 namespace owd
 {
     /// <summary>

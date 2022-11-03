@@ -6,7 +6,7 @@ namespace owd
 
 	void c_glfw_init::terminate()
 	{
-		glfwTerminate;
+		GLFW_CALL(glfwTerminate());
 		m_is_initialzed = false;
 	}
 } // namespace owd

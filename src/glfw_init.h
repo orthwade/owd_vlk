@@ -9,6 +9,7 @@
 #include <GLFW/glfw3.h>
 
 #include "owd_lib/owd_lib.h"
+#include "glfw_error.h"
 
 namespace owd
 {
@@ -22,7 +23,11 @@ namespace owd
         /// Init GLFW and get
         /// </summary>
         /// <returns></returns>
-        inline static bool init() { return m_is_initialzed = (glfwInit() == GLFW_TRUE) ? true : false; }
+        static bool init() 
+        {
+            GLFW_CALL(m_is_initialzed = (glfwInit() == GLFW_TRUE));
+            return m_is_initialzed;
+        }
 
         /// <summary>
         /// Get GLFW init result int code.

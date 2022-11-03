@@ -236,7 +236,6 @@ check whether a specific platform is supported by a library binary."
 			}
 		)
 	{
-		glfwSetErrorCallback(static_glfw_error_callback);
 	}
 
 	void c_glfw_errors::error_callback(int32_t _error_code)
@@ -267,8 +266,10 @@ check whether a specific platform is supported by a library binary."
 			<< L"Analysis: "	<< error_.get_analysis() << L'\n';
 	}
 
-	void c_glfw_errors::print_last_error()
+	bool c_glfw_errors::print_last_error()
 	{
+		bool result_ = false;
+
 		std::mutex mtx_{};
 		std::lock_guard lg_{ mtx_ };
 
@@ -279,6 +280,22 @@ check whether a specific platform is supported by a library binary."
 			<< L"Name: " << error_.get_name() << L";\n"
 			<< L"Description: " << error_.get_info() << L";\n"
 			<< L"Analysis: " << error_.get_analysis() << L'\n';
+
+		if (error_.get_code() == GLFW_NO_ERROR)
+		{
+			result_ = true;
+		}
+
+		return result_;
+	}
+
+	bool c_glfw_errors::no_error()
+	{
+		const c_glfw_error& error_{ m_map_error.at(glfwGetError(nullptr)) };
+		
+		bool result_ = error_.no_error();
+
+		return result_;
 	}
 
 	void c_glfw_errors::terminate()

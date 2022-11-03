@@ -10,34 +10,12 @@ namespace owd
         m_instance(),
         m_glfw_init_result(c_glfw_init::init()),
         m_glfw_ext(),
-        m_glfw_ext_names(glfwGetRequiredInstanceExtensions(&m_glfw_ext)),
-        m_app_info
-        (
-            {
-                VK_STRUCTURE_TYPE_APPLICATION_INFO,
-                nullptr,
-                nullptr,
-                0,
-                nullptr,
-                0
-
-            }
-        ),
-        m_create_info
-        (
-            {
-                VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO, // VkStructureType             sType;
-                nullptr,                                // const void*                 pNext;
-                VkInstanceCreateFlags{},                // VkInstanceCreateFlags       flags;
-                &m_app_info,                            // const VkApplicationInfo*    pApplicationInfo;
-                0,                                      // uint32_t                    enabledLayerCount;
-                nullptr,
-                m_glfw_ext,
-                m_glfw_ext_names
-            }
-        ),
+        m_glfw_ext_names(),
+        m_app_info(),
+        m_create_info(),
         m_result(vkCreateInstance(&m_create_info, nullptr, &m_instance))
     {
+        GLFW_CALL(m_glfw_ext_names = glfwGetRequiredInstanceExtensions(&m_glfw_ext));
     }
     void c_vulkan_instance::terminate()
     {

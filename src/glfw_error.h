@@ -2,8 +2,12 @@
 #include <unordered_map>
 #include <mutex>
 
+#include <GLFW/glfw3.h>
+
 #include "owd_lib/owd_lib.h"
-#include "glfw_init.h"
+
+
+
 
 namespace owd
 {
@@ -56,6 +60,11 @@ namespace owd
         /// <returns></returns>
         inline wsv_t get_analysis() const { return m_analysis; }
 
+        /// <summary>
+        /// Get true if no error.
+        /// </summary>
+        inline bool no_error() const { return m_code == GLFW_NO_ERROR; }
+
     protected:
         int32_t m_code;
         std::wstring m_info;
@@ -97,7 +106,12 @@ namespace owd
         /// <summary>
         /// Print full error info of the last error.
         /// </summary>
-        void print_last_error();
+        bool print_last_error();
+
+        /// <summary>
+        /// Get true if GLFW last error is GLFW_NO_ERROR.
+        /// </summary>
+        bool no_error();
 
         /// <summary>
         /// Delete this class singleton object.
@@ -118,5 +132,44 @@ namespace owd
         const umap_t<int32_t, c_glfw_error> m_map_error;
     };
 
+    #ifndef ASSERT
+    #define ASSERT(_x) if(!(_x)) __debugbreak();
+    #endif // !ASSERT
+
+    #ifndef GLFW_DEBUG
+    #define GLFW_DEBUG
+    #endif // !GLFW_DEBUG
+
+    #ifdef GLFW_DEBUG
+        #ifndef GLFW_CALL
+        #define GLFW_CALL(_x)                                                   \
+        {                                                                       \
+            _x;                                                                 \
+            owd::c_glfw_errors& error_manager_ = owd::c_glfw_errors::get();     \
+            bool glfw_no_error_ = error_manager_.print_last_error();            \
+            ASSERT(glfw_no_error_);                                             \
+        }
+        #endif // !GLFW_CALL
+
+        #ifndef GLFW_CALL_NO_PRINT
+        #define GLFW_CALL_NO_PRINT(_x)                                      \
+        {                                                                   \
+            _x;                                                             \
+            owd::c_glfw_errors& error_manager_ = owd::c_glfw_errors::get(); \
+            bool glfw_no_error_ = error_manager_.no_error();                \
+            ASSERT(glfw_no_error_);                                         \
+        }
+        #endif // !GLFW_CALL_NO_PRINT
+    #else
+        #ifndef GLFW_CALL
+        #define GLFW_CALL(_x) _x;
+        #endif // !GLFW_CALL
+
+        #ifndef GLFW_CALL_NO_PRINT
+        #define GLFW_CALL_NO_PRINT(_x) _x;
+        #endif // !GLFW_CALL_NO_PRINT
+    #endif // !GLFW_DEBUG
+
+    
    
 } // namespace owd

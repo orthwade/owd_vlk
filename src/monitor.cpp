@@ -13,8 +13,9 @@ namespace owd
 	c_monitors::c_monitors()
 		:
 		m_count(),
-		m_ptr_ptr_glfw_monitor(glfwGetMonitors(&m_count))
+		m_ptr_ptr_glfw_monitor()
 	{
+		GLFW_CALL(m_ptr_ptr_glfw_monitor = (glfwGetMonitors(&m_count)));
 	}
 
 } // namespace owd

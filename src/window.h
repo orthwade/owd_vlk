@@ -10,6 +10,7 @@
 #include <GLFW/glfw3.h>
 
 #include "owd_lib/owd_lib.h"
+#include "glfw_error.h"
 
 namespace owd
 {
@@ -64,7 +65,7 @@ namespace owd
         void set_fullscreen();
 
         /// @brief Close window.
-        inline void close() { glfwDestroyWindow(m_glfw_wnd); }
+        inline void close() { GLFW_CALL(glfwDestroyWindow(m_glfw_wnd)); }
 
         /// @brief Close window, terminate GLFW and delete singleton. 
         /// get() will be required to use this class further.

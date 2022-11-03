@@ -7,14 +7,13 @@ namespace owd
     void c_window::init(int32_t _w, int32_t _h, std::string_view _name,
                         const std::vector<s_wnd_hint> &_vec_hint)
     {
-        glfwDestroyWindow(m_glfw_wnd);
+        GLFW_CALL(glfwDestroyWindow(m_glfw_wnd));
 
         for (const s_wnd_hint &hint_ : _vec_hint)
-            glfwWindowHint(hint_.hint_id, hint_.value);
+            GLFW_CALL(glfwWindowHint(hint_.hint_id, hint_.value));
 
-        glfwSwapInterval(1);
 
-        m_glfw_wnd = glfwCreateWindow(_w, _h, _name.data(), nullptr, nullptr);
+        GLFW_CALL(m_glfw_wnd = glfwCreateWindow(_w, _h, _name.data(), nullptr, nullptr));
     }
 
     void c_window::set_func_update_window(const std::function<void()>& _func)
@@ -24,7 +23,7 @@ namespace owd
 
     void c_window::default_func_update_window()
     {
-        glfwPollEvents();
+        GLFW_CALL_NO_PRINT(glfwPollEvents());
     }
 
     void c_window::run()
@@ -46,8 +45,6 @@ namespace owd
             m_list_singleton.remove(m_singleton);
 
             m_singleton->close();
-
-            glfwTerminate();
 
             delete m_singleton;
             m_singleton = nullptr;
