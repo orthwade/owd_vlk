@@ -37,6 +37,7 @@ namespace owd
 	}
 
 	c_monitors* c_monitors::m_singleton{};
+
 	c_monitor::s_gamma_ramp::s_gamma_ramp(const GLFWgammaramp* _glfw_ramp)
 		:
 		size(_glfw_ramp->size),
@@ -78,7 +79,7 @@ namespace owd
 
 		GLFW_CALL(glfwGetMonitorPhysicalSize(_glfw_monitor, &m_phys_size.w, &m_phys_size.h));
 
-		GLFW_CALL(glfwGetMonitorContentScale(_glfw_monitor, &m_scale.x, &m_scale.x));
+		GLFW_CALL(glfwGetMonitorContentScale(_glfw_monitor, &m_scale.x, &m_scale.y));
 
 		GLFW_CALL(glfwGetMonitorPos(_glfw_monitor, &m_pos.x, &m_pos.y));
 
@@ -94,9 +95,6 @@ namespace owd
 
 		m_initial_gamma_ramp = s_gamma_ramp(ramp_);
 		m_gamma_ramp = m_initial_gamma_ramp;
-
-		
-
 	}
 
 	void c_monitors::update()

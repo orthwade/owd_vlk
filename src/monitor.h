@@ -147,6 +147,9 @@ namespace owd
         /// <returns></returns>
         inline const c_video_mode::ptr& get_vid_mode_current() const { return m_vid_mode_current; }
 
+
+        inline const s_phys_size& get_phys_size() const { return m_phys_size; }
+
     protected:
         GLFWmonitor* m_glfw_monitor;
 
