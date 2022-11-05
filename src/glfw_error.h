@@ -91,12 +91,18 @@ namespace owd
         inline static c_glfw_errors* const get_ptr() 
         { return m_singleton ? m_singleton : (m_singleton = new c_glfw_errors); }
 
-        const umap_t<int32_t, c_glfw_error>& get_map_error() const { return m_map_error; }
+        const umap_t<int32_t, const c_glfw_error>& get_map_error() const { return m_map_error; }
 
         /// <summary>
         /// Error callback.
         /// </summary>
         void error_callback(int32_t _error_code);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        const c_glfw_error& get_last_error();
 
         /// <summary>
         /// Print full error info with given error integer code.
@@ -129,7 +135,7 @@ namespace owd
         c_glfw_errors(const c_glfw_errors&) = delete;
         c_glfw_errors& operator=(const c_glfw_errors&) = delete;
 
-        const umap_t<int32_t, c_glfw_error> m_map_error;
+        const umap_t<int32_t, const c_glfw_error> m_map_error;
     };
 
     #ifndef ASSERT

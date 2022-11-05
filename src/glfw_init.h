@@ -7,6 +7,7 @@
 #define GLFW_INCLUDE_VULKAN
 
 #include <GLFW/glfw3.h>
+#include <GLFW/glfw3native.h>
 
 #include "owd_lib/owd_lib.h"
 #include "glfw_error.h"
@@ -20,14 +21,10 @@ namespace owd
     {
     public:
         /// <summary>
-        /// Init GLFW and get
+        /// Init GLFW. Get true if initialized succesfully, get false otherwise.
         /// </summary>
         /// <returns></returns>
-        static bool init() 
-        {
-            GLFW_CALL(m_is_initialzed = (glfwInit() == GLFW_TRUE));
-            return m_is_initialzed;
-        }
+        static bool init();
 
         /// <summary>
         /// Get GLFW init result int code.

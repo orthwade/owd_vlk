@@ -24,6 +24,7 @@ namespace owd
         m_vulkan_instance(&c_vulkan_instance::init())
     {
         c_glfw_init::init();
+        m_monitors = &c_monitors::get();
         m_window->init();
     }
 

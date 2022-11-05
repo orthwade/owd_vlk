@@ -249,7 +249,12 @@ check whether a specific platform is supported by a library binary."
 			<< L"GLFW error callback:\n"
 			<< L"Name: " << error_.get_name() << L";\n"
 			<< L"Description: " << error_.get_info() << L";\n"
-			<< L"Analysis: " << error_.get_analysis() << L'\n';
+			<< L"Analysis: " << error_.get_analysis() << L"\n\n";
+	}
+
+	const c_glfw_error& c_glfw_errors::get_last_error()
+	{
+		return m_map_error.at(glfwGetError(nullptr));
 	}
 
 	void c_glfw_errors::print_error(int32_t _error_code)
@@ -263,7 +268,7 @@ check whether a specific platform is supported by a library binary."
 			<< L"GLFW error:\n"
 			<< L"Name: "		<< error_.get_name()	 << L";\n"
 			<< L"Description: "	<< error_.get_info()	 << L";\n"
-			<< L"Analysis: "	<< error_.get_analysis() << L'\n';
+			<< L"Analysis: "	<< error_.get_analysis() << L"\n\n";
 	}
 
 	bool c_glfw_errors::print_last_error()
@@ -279,7 +284,7 @@ check whether a specific platform is supported by a library binary."
 			<< L"GLFW last error:\n"
 			<< L"Name: " << error_.get_name() << L";\n"
 			<< L"Description: " << error_.get_info() << L";\n"
-			<< L"Analysis: " << error_.get_analysis() << L'\n';
+			<< L"Analysis: " << error_.get_analysis() << L"\n\n";
 
 		if (error_.get_code() == GLFW_NO_ERROR)
 		{

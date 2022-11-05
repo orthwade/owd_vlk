@@ -28,8 +28,17 @@ namespace owd
 
     void c_window::run()
     {
-        while (!glfwWindowShouldClose(m_glfw_wnd))
+        int32_t window_should_close_{};
+
+        while (true)
         {
+            GLFW_CALL_NO_PRINT(window_should_close_ = glfwWindowShouldClose(m_glfw_wnd));
+
+            if (window_should_close_)
+            {
+                break;
+            }
+
             m_func_update_window();
         }
     }

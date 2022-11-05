@@ -2,6 +2,7 @@
 #include "owd_lib/owd_lib.h"
 #include "glfw_error.h"
 #include "glfw_init.h"
+#include "monitor.h"
 #include "window.h"
 #include "shader/shader.h"
 #include "vulkan_instance.h"
@@ -11,13 +12,19 @@ namespace owd
     /// @brief Singleton class of application.
     class c_app : public c_singleton
     {
-        public:
+    public:
         /// <summary>
+        /// Create singleton object, if not created already. 
         /// Get reference to single instance of this class object.
         /// </summary>
         /// <returns></returns>
         inline static c_app& get() { return m_singleton ? *m_singleton : (*(m_singleton = new c_app)); }
 
+        /// <summary>
+        /// Create singleton object, if not created already. 
+        /// Get pointer to single instance of this class object. 
+        /// </summary>
+        /// <returns></returns>
         inline static c_app* const get_ptr() { return m_singleton ? m_singleton : (m_singleton = new c_app); }
 
         /// <summary>
@@ -43,7 +50,25 @@ namespace owd
         /// <returns></returns>
         inline c_shaders& get_shaders() { return *m_shaders; }
 
-        protected:
+        /// <summary>
+        /// Get reference to monitor manager.
+        /// </summary>
+        /// <returns></returns>
+        inline c_monitors& get_monitors() { return *m_monitors; }
+
+        /// <summary>
+        /// Get reference to GLFW error manager.
+        /// </summary>
+        inline c_glfw_errors& get_glfw_errors() { return *m_glfw_errors; }
+
+        /// <summary>
+        /// Get reference to Vulkan instance.
+        /// </summary>
+        inline c_vulkan_instance& get_vulkan_instane() { return *m_vulkan_instance; }
+
+    protected:
+        c_monitors* m_monitors;
+
         c_glfw_errors* m_glfw_errors;
 
         c_window* m_window;
