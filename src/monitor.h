@@ -52,13 +52,74 @@ namespace owd
         const int32_t m_refresh_rate;
     };
 
+
+
     /// <summary>
     /// Class of monitor info.
     /// </summary>
-    class c_monitor
+    class c_monitor : public c_object
     {
     public:
-        using ptr = std::shared_ptr<c_monitor>;
+        /// <summary>
+        /// Monitor physical size in millimitres.
+        /// </summary>
+        struct s_phys_size
+        {
+            int32_t w; // Width.
+            int32_t h; // Height.
+        };
+
+        /// <summary>
+        /// Monitor content scale.
+        /// The content scale is the ratio between the current DPI and the platform's default DPI. 
+        /// This is especially important for text and any UI elements. 
+        /// If the pixel dimensions of your UI scaled by this look appropriate on your machine 
+        /// then it should appear at a reasonable size on other machines regardless of their DPI and scaling settings. 
+        /// This relies on the system DPI and scaling settings being somewhat correct.
+        /// The content scale may depend on both the monitor resolutionand pixel densityand on user settings.
+        /// It may be very different from the raw DPI calculated from the physical sizeand current resolution.
+        /// </summary>
+        struct s_scale
+        {
+            float x; // Horizontal scale.
+            float y; // Vertical scael.
+        };
+
+        /// <summary>
+        /// The position of the monitor on the virtual desktop, in screen coordinates.
+        /// </summary>
+        struct s_pos
+        {
+            int32_t x; // Horizontal coordinate.
+            int32_t y; // Vertical coordinate.
+        };
+        
+        /// <summary>
+        /// The area of a monitor not occupied by global task bars or menu bars is the work area. 
+        /// This is specified in screen coordinates.
+        /// </summary>
+        struct s_work_area
+        {
+            int32_t x; // Horizontal coordinate.
+            int32_t y; // Vertical coordinate.
+            int32_t w; // Width.
+            int32_t h; // Height.
+        };
+
+        /// <summary>
+        /// Monitor gamma ramp.
+        /// </summary>
+        struct s_gamma_ramp
+        {
+            s_gamma_ramp(const GLFWgammaramp* _glfw_ramp);
+            s_gamma_ramp() : size(), r(), g(), b() {};
+            uint32_t size; // The number of elements in each vector.
+            vec_t<uint32_t> r; // A vector of value of the response of the red channel.
+            vec_t<uint32_t> g; // A vector of value of the response of the green channel.
+            vec_t<uint32_t> b; // A vector of value of the response of the blue channel.
+        };
+
+        using ptr = ptr_t<c_monitor>;
 
         /// <summary>
         /// Construct object of this class, 
@@ -73,6 +134,8 @@ namespace owd
         /// <param name="_glfw_monitor"></param>
         c_monitor(GLFWmonitor* _glfw_monitor);
 
+        GLFWmonitor* const get_glfw_monitor() const { return m_glfw_monitor; }
+
         /// <summary>
         /// Get vector of this monitor's video modes.
         /// </summary>
@@ -85,9 +148,24 @@ namespace owd
         inline const c_video_mode::ptr& get_vid_mode_current() const { return m_vid_mode_current; }
 
     protected:
+        GLFWmonitor* m_glfw_monitor;
+
         vec_t<c_video_mode::ptr> m_vec_vid_mode;
 
         c_video_mode::ptr m_vid_mode_current;
+
+        s_phys_size m_phys_size;
+
+        s_scale m_scale;
+
+        s_pos m_pos;
+
+        s_work_area m_work_area;
+
+        s_gamma_ramp m_initial_gamma_ramp;
+        s_gamma_ramp m_gamma_ramp;
+
+        inline virtual void set_name(wsv_t) override {};
     };
 
     /// <summary>
@@ -115,7 +193,7 @@ namespace owd
         /// Get vector of monitor pointers.
         /// </summary>
         /// <returns></returns>
-        inline vec_t<c_monitor::ptr>& get_vec_monitor() { return m_vec_monitor; }
+        inline list_t<c_monitor::ptr>& get_list_monitor() { return m_list_monitor; }
 
         /// <summary>
         /// Get primary monitor.
@@ -129,7 +207,7 @@ namespace owd
         void update();
 
     protected:
-        vec_t<c_monitor::ptr> m_vec_monitor;
+        list_t<c_monitor::ptr> m_list_monitor;
 
         c_monitor::ptr m_primary;
 

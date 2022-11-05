@@ -10,4 +10,10 @@ namespace owd
 
 	}
 
+	void c_object::set_name(std::wstring_view _name) 
+	{
+		m_name = _name;
+		m_logger.set_name(_name);
+	}
+
 } // namespace owd

@@ -66,7 +66,5 @@ namespace owd
         m_func_update_window(std::bind(&c_window::default_func_update_window, this)),
         m_glfw_wnd()
     {
-
     }
-
 } // namespace owd

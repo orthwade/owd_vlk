@@ -9,6 +9,9 @@ namespace owd
 	template<class T>
 	using vec_t = std::vector<T>;
 
+	template<class T>
+	using list_t = std::list<T>;
+
 	template<class T1, class T2>
 	using umap_t = std::unordered_map<T1, T2>;
 

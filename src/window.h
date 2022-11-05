@@ -80,10 +80,10 @@ namespace owd
 
         std::function<void()> m_func_update_window;
 
+        GLFWwindow* m_glfw_wnd;
+
         void default_func_update_window();
 
-        GLFWwindow* m_glfw_wnd;
-        
         //std::vector<c_monitor::ptr> m_vec_monitor;
 
         static c_window* m_singleton;

@@ -40,7 +40,7 @@ namespace owd
 		/// Set object name.
 		/// </summary>
 		/// <param name="_name"></param>
-		inline virtual void set_name(std::wstring_view _name) { m_name = _name; }
+		virtual void set_name(std::wstring_view _name);
 
 	protected:
 		std::wstring m_name;

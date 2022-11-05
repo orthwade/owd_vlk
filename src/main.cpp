@@ -6,6 +6,8 @@ using namespace owd;
 
 int main(int32_t arg_count, char *args[])
 {
+    const vec_t<int32_t> vec_int_{};
+
     std::wstring ww_ = current_date_wstr();
 
     c_logger::set_global_mode_both();
