@@ -137,17 +137,19 @@ namespace owd
 	}
 
 	bool c_monitor::set_gamma_ramp
-	(uint32_t _size, const vec_t<uint16_t>& _r, const vec_t<uint16_t>& _g, const vec_t<uint16_t>& _b)
+	(const vec_t<uint16_t>& _r, const vec_t<uint16_t>& _g, const vec_t<uint16_t>& _b)
 	{
 		bool result = false;
+		
+		size_t size_ = _r.size();
 
-		if (_r.size() == _size && _g.size() == _size && _b.size() == _size)
+		if (_r.size() == size_ && _g.size() == size_ && _b.size() == size_)
 		{
-			m_gamma_ramp = c_monitor::s_gamma_ramp(_size, _r, _g, _b);
+			m_gamma_ramp = c_monitor::s_gamma_ramp(size_, _r, _g, _b);
 
 			GLFWgammaramp ramp{};
 
-			ramp.size  = _size;
+			ramp.size  = size_;
 
 			ramp.red   = m_gamma_ramp.r.data();
 			ramp.green = m_gamma_ramp.g.data();

@@ -208,7 +208,7 @@ namespace owd
         /// <param name="_b"></param>
         /// <returns></returns>
         bool set_gamma_ramp
-        (uint32_t _size, const vec_t<uint16_t>& _r, const vec_t<uint16_t>& _g, const vec_t<uint16_t>& _b);
+        (const vec_t<uint16_t>& _r, const vec_t<uint16_t>& _g, const vec_t<uint16_t>& _b);
 
         /// <summary>
         /// Set deafault gamma.
