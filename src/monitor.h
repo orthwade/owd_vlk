@@ -112,11 +112,13 @@ namespace owd
         struct s_gamma_ramp
         {
             s_gamma_ramp(const GLFWgammaramp* _glfw_ramp);
+            s_gamma_ramp(uint32_t _size, const vec_t<uint16_t>& _r, const vec_t<uint16_t>& _g, const vec_t<uint16_t>& _b)
+                : size(_size), r(_r), g(_g), b(_b) {};
             s_gamma_ramp() : size(), r(), g(), b() {};
             uint32_t size; // The number of elements in each vector.
-            vec_t<uint32_t> r; // A vector of value of the response of the red channel.
-            vec_t<uint32_t> g; // A vector of value of the response of the green channel.
-            vec_t<uint32_t> b; // A vector of value of the response of the blue channel.
+            vec_t<uint16_t> r; // A vector of value of the response of the red channel.
+            vec_t<uint16_t> g; // A vector of value of the response of the green channel.
+            vec_t<uint16_t> b; // A vector of value of the response of the blue channel.
         };
 
         using ptr = ptr_t<c_monitor>;
@@ -134,6 +136,10 @@ namespace owd
         /// <param name="_glfw_monitor"></param>
         c_monitor(GLFWmonitor* _glfw_monitor);
 
+        /// <summary>
+        /// Get pointer to GLFWmonitor object.
+        /// </summary>
+        /// <returns></returns>
         GLFWmonitor* const get_glfw_monitor() const { return m_glfw_monitor; }
 
         /// <summary>
@@ -145,10 +151,70 @@ namespace owd
         /// Get current video mode.
         /// </summary>
         /// <returns></returns>
-        inline const c_video_mode::ptr& get_vid_mode_current() const { return m_vid_mode_current; }
+        const c_video_mode::ptr& get_vid_mode_current();
 
-
+        /// <summary>
+        /// The physical size of a monitor in millimetres, or an estimation of it. 
+        /// This has no relation to its current resolution, i.e. the width and height of its current video mode.
+        /// </summary>
+        /// <returns></returns>
         inline const s_phys_size& get_phys_size() const { return m_phys_size; }
+
+        /// <summary>
+        /// The content scale for a monitor.
+        /// The content scale is the ratio between the current DPI and the platform's default DPI. 
+        /// This is especially important for text and any UI elements. 
+        /// If the pixel dimensions of your UI scaled by this look appropriate on your machine 
+        /// then it should appear at a reasonable size on other machines regardless of their DPI and scaling settings. 
+        /// This relies on the system DPI and scaling settings being somewhat correct.
+        /// The content scale may depend on both the monitor resolutionand pixel densityand on user settings.
+        /// It may be very different from the raw DPI calculated from the physical sizeand current resolution.
+        /// </summary>
+        /// <returns></returns>
+        const s_scale& get_scale();
+
+        /// <summary>
+        /// The position of the monitor on the virtual desktop, in screen coordinates.
+        /// Screen coordinates: https://www.glfw.org/docs/3.3/intro_guide.html#coordinate_systems
+        /// </summary>
+        /// <returns></returns>
+        const s_pos& get_pos();
+
+        /// <summary>
+        /// The area of a monitor not occupied by global task bars or menu bars is the work area.
+        /// This is specified in screen coordinates.
+        /// </summary>
+        /// <returns></returns>
+        const s_work_area& get_work_area();
+
+        /// <summary>
+        /// Get gamma ramp which was calculated on GLFW init or monitor connection.
+        /// </summary>
+        /// <returns></returns>
+        inline const s_gamma_ramp& get_initial_gamma_ramp() const { return m_initial_gamma_ramp; }
+
+        /// <summary>
+        /// Get current gamma ramp.
+        /// </summary>
+        /// <returns></returns>
+        const s_gamma_ramp& get_gamma_ramp();
+
+        /// <summary>
+        /// Set gamma ramp. See owd::c_monitor::s_gamma_ramp for more info.
+        /// </summary>
+        /// <param name="_size"></param>
+        /// <param name="_r"></param>
+        /// <param name="_g"></param>
+        /// <param name="_b"></param>
+        /// <returns></returns>
+        bool set_gamma_ramp
+        (uint32_t _size, const vec_t<uint16_t>& _r, const vec_t<uint16_t>& _g, const vec_t<uint16_t>& _b);
+
+        /// <summary>
+        /// Set deafault gamma.
+        /// </summary>
+        /// <param name="_exponent"></param>
+        void set_deafault_gamma_ramp(float _exponent = 1.0f);
 
     protected:
         GLFWmonitor* m_glfw_monitor;

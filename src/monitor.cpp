@@ -2,17 +2,17 @@
 
 namespace owd
 {
-	static void monitor_callback(GLFWmonitor* _glfw_monitor, int event)
+	static void monitor_callback(GLFWmonitor* _glfw_monitor, int _event)
 	{
 		c_monitors& monitors_ = c_monitors::get();
 
 		list_t<c_monitor::ptr>& list_monitor = monitors_.get_list_monitor();
 
-		if (event == GLFW_CONNECTED)
+		if (_event == GLFW_CONNECTED)
 		{
 			list_monitor.push_back(c_monitor::make(_glfw_monitor));
 		}
-		else if (event == GLFW_DISCONNECTED)
+		else if (_event == GLFW_DISCONNECTED)
 		{
 			for (c_monitor::ptr& monitor : monitors_.get_list_monitor())
 			{
@@ -65,7 +65,7 @@ namespace owd
 
 		const GLFWvidmode* ptr_glfw_vid_mode_{};
 
-		GLFW_CALL(ptr_glfw_vid_mode_ = glfwGetVideoModes(_glfw_monitor, &vid_mode_count_));
+		GLFW_CALL(ptr_glfw_vid_mode_ = glfwGetVideoModes(m_glfw_monitor, &vid_mode_count_));
 
 		for (size_t i_ = 0; i_ < vid_mode_count_; ++i_)
 		{
@@ -73,15 +73,18 @@ namespace owd
 			++ptr_glfw_vid_mode_;
 		}
 
-		ptr_glfw_vid_mode_ = glfwGetVideoMode(_glfw_monitor);
+		ptr_glfw_vid_mode_ = glfwGetVideoMode(m_glfw_monitor);
 
 		m_vid_mode_current = c_video_mode::make(ptr_glfw_vid_mode_);
 
-		GLFW_CALL(glfwGetMonitorPhysicalSize(_glfw_monitor, &m_phys_size.w, &m_phys_size.h));
+		GLFW_CALL(glfwGetMonitorPhysicalSize(m_glfw_monitor, &m_phys_size.w, &m_phys_size.h));
 
-		GLFW_CALL(glfwGetMonitorContentScale(_glfw_monitor, &m_scale.x, &m_scale.y));
+		GLFW_CALL(glfwGetMonitorContentScale(m_glfw_monitor, &m_scale.x, &m_scale.y));
 
-		GLFW_CALL(glfwGetMonitorPos(_glfw_monitor, &m_pos.x, &m_pos.y));
+		GLFW_CALL(glfwGetMonitorPos(m_glfw_monitor, &m_pos.x, &m_pos.y));
+
+		GLFW_CALL(glfwGetMonitorWorkarea
+		(m_glfw_monitor, &m_work_area.x, &m_work_area.y, &m_work_area.w, &m_work_area.h));
 
 		const char* name_c_str_{};
 
@@ -97,9 +100,79 @@ namespace owd
 		m_gamma_ramp = m_initial_gamma_ramp;
 	}
 
+
+	/// <summary>
+	/// Get current video mode.
+	/// </summary>
+	/// <returns></returns>
+	const c_video_mode::ptr& c_monitor::get_vid_mode_current()
+	{
+		GLFW_CALL(m_vid_mode_current = c_video_mode::make(glfwGetVideoMode(m_glfw_monitor)));
+		return m_vid_mode_current;
+	}
+
+	const c_monitor::s_scale& c_monitor::get_scale()
+	{
+		GLFW_CALL(glfwGetMonitorContentScale(m_glfw_monitor, &m_scale.x, &m_scale.y));
+		return m_scale;
+	}
+
+	const c_monitor::s_pos& c_monitor::get_pos() 
+	{
+		GLFW_CALL(glfwGetMonitorPos(m_glfw_monitor, &m_pos.x, &m_pos.y));
+		return m_pos;
+	}
+
+	const c_monitor::s_work_area& c_monitor::get_work_area()
+	{
+		GLFW_CALL(glfwGetMonitorWorkarea
+		(m_glfw_monitor, &m_work_area.x, &m_work_area.y, &m_work_area.w, &m_work_area.h));
+		return m_work_area;
+	}
+
+	const c_monitor::s_gamma_ramp& c_monitor::get_gamma_ramp()
+	{
+		GLFW_CALL(m_gamma_ramp = c_monitor::s_gamma_ramp(glfwGetGammaRamp(m_glfw_monitor)));
+		return m_gamma_ramp;
+	}
+
+	bool c_monitor::set_gamma_ramp
+	(uint32_t _size, const vec_t<uint16_t>& _r, const vec_t<uint16_t>& _g, const vec_t<uint16_t>& _b)
+	{
+		bool result = false;
+
+		if (_r.size() == _size && _g.size() == _size && _b.size() == _size)
+		{
+			m_gamma_ramp = c_monitor::s_gamma_ramp(_size, _r, _g, _b);
+
+			GLFWgammaramp ramp{};
+
+			ramp.size  = _size;
+
+			ramp.red   = m_gamma_ramp.r.data();
+			ramp.green = m_gamma_ramp.g.data();
+			ramp.blue  = m_gamma_ramp.b.data();
+
+			GLFW_CALL(glfwSetGammaRamp(m_glfw_monitor, &ramp));
+
+			result = true;
+		}
+		else
+		{
+			m_logger << L"Set gamma ERROR: size is invalid.\n";
+		}
+
+		return result;
+	}
+
+	void c_monitor::set_deafault_gamma_ramp(float _exponent)
+	{
+		GLFW_CALL(glfwSetGamma(m_glfw_monitor, _exponent));
+		GLFW_CALL(m_gamma_ramp = c_monitor::s_gamma_ramp(glfwGetGammaRamp(m_glfw_monitor)));
+	}
+
 	void c_monitors::update()
 	{
-
 	}
 
 	c_monitors::c_monitors()
