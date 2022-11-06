@@ -1,12 +1,14 @@
 #pragma once 
 #include <list>
 
+#include "owd_object.h"
+
 namespace owd
 {
 	/// <summary>
 	/// Singleton object class
 	/// </summary>
-	class c_singleton
+	class c_singleton : public c_object
 	{
 	public:
 		/// <summary>

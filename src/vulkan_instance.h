@@ -30,15 +30,21 @@ namespace owd
 		
 		bool m_glfw_init_result;
 
-		uint32_t m_glfw_ext;
+		uint32_t m_glfw_ext_count;
 
 		const char** m_glfw_ext_names;
+
+		vec_t<std::string> m_vec_glfw_ext_name;
 
 		VkApplicationInfo m_app_info;
 
 		VkInstanceCreateInfo m_create_info;
 
-		VkResult m_result;
+		VkResult m_create_result;
+
+		vec_t<std::string> m_vec_instance_ext_name;
+
+		vec_t<std::string> m_vec_layer_name;
 
 		static c_vulkan_instance* m_singleton;
 

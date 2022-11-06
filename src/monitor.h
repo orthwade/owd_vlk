@@ -188,6 +188,13 @@ namespace owd
         const s_work_area& get_work_area();
 
         /// <summary>
+        /// Monitor names are not guaranteed to be unique. 
+        /// Two monitors of the same model and make may have the same name.
+        /// </summary>
+        /// <returns></returns>
+        virtual wsv_t get_name() const override { return m_name; }
+
+        /// <summary>
         /// Get gamma ramp which was calculated on GLFW init or monitor connection.
         /// </summary>
         /// <returns></returns>
