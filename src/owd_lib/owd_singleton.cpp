@@ -24,6 +24,13 @@ namespace owd
 				{
 					m_list_singleton.pop_back();
 				}
+				if (!m_list_singleton.empty())
+				{
+					if (singleton == m_list_singleton.back())
+					{
+						m_list_singleton.pop_back();
+					}
+				}
 			}
 		}
 	}
