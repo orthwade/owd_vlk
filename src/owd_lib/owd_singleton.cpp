@@ -6,22 +6,23 @@ namespace owd
 
 	void c_singleton::terminate_all_singletons()
 	{
-		if (!m_list_singleton.empty())
+		while (true)
 		{
-			while (true)
+			if (m_list_singleton.empty())
 			{
-				if (m_list_singleton.empty())
+				break;
+			}
+			else
+			{
+				c_singleton* singleton = m_list_singleton.back();
+
+				if (singleton)
 				{
-					break;
+					singleton->terminate();
 				}
 				else
 				{
-					c_singleton* singleton = m_list_singleton.back();
-
-					if (singleton)
-					{
-						singleton->terminate();
-					}
+					m_list_singleton.pop_back();
 				}
 			}
 		}
