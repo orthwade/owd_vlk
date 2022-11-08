@@ -33,6 +33,7 @@ namespace owd
     {
         m_glfw_init_result = c_glfw_init::init();
 
+        // 1. Get required extensions
         GLFW_CALL(m_glfw_ext_names = glfwGetRequiredInstanceExtensions(&m_glfw_ext_count));
 
         for (size_t i_ = 0; i_ < m_glfw_ext_count; ++i_)
@@ -40,10 +41,7 @@ namespace owd
             m_vec_glfw_ext_name.push_back(std::string(m_glfw_ext_names[i_]));
         }
 
-        m_create_info.enabledExtensionCount = m_glfw_ext_count;
-        m_create_info.ppEnabledExtensionNames = m_glfw_ext_names;
-        m_create_info.enabledLayerCount = 0;
-
+        // 2. Get all supported extensions.
         uint32_t supported_ext_count_ = 0;
 
         vkEnumerateInstanceExtensionProperties(nullptr, &supported_ext_count_, nullptr);
@@ -52,18 +50,47 @@ namespace owd
 
         vkEnumerateInstanceExtensionProperties(nullptr, &supported_ext_count_, vec_supported_ext_.data());
 
+        // 3. Provide Mac OS compatibility extensions if necessary and if not done automatically in step 1.
+        bool mac_ext_supported_ = false;
+
+        bool mac_ext_already_added_ = false;
+
+        bool add_mac_ext_manually_ = false;
+        
         for (const VkExtensionProperties& supported_ext_ : vec_supported_ext_)
         {
             if (supported_ext_.extensionName == VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME)
             {
-                m_vec_glfw_ext_name.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
-
-                m_create_info.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
-
+                mac_ext_supported_ = true;
                 break;
             }
         }
 
+        if (mac_ext_supported_)
+        {
+            for (const std::string& ext_ : m_vec_glfw_ext_name)
+            {
+                if (ext_ == VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME)
+                {
+                    mac_ext_already_added_ = true;
+                    break;
+                }
+            }
+        }
+
+        if (!mac_ext_already_added_ && mac_ext_supported_)
+        {
+            add_mac_ext_manually_ = true;
+        }
+
+        if (add_mac_ext_manually_)
+        {
+            m_vec_glfw_ext_name.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+
+            m_create_info.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+        }
+
+        // 4. Convert stored extension data to Vulkan supported format and set create info fields.
         std::vector<const char*> vec_ext_name_{};
 
         for (const std::string& str_ext_name_ : m_vec_glfw_ext_name)
@@ -74,11 +101,13 @@ namespace owd
         m_create_info.enabledExtensionCount = static_cast<uint32_t>(vec_ext_name_.size());
         m_create_info.ppEnabledExtensionNames = vec_ext_name_.data();
 
+        // 5. Create instance.
         m_create_result = vkCreateInstance(&m_create_info, nullptr, &m_instance);
 
         if (m_create_result != VK_SUCCESS) 
         {
-            throw std::runtime_error("failed to create instance!");
+            m_logger << L"ERROR: failed to create instance!\n";
+            throw std::runtime_error("");
         }
 
     }
