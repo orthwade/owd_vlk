@@ -34,7 +34,7 @@ namespace owd
 
 		const char** m_glfw_ext_names;
 
-		vec_t<std::string> m_vec_glfw_ext_name;
+		vec_t<const char*> m_vec_glfw_ext_name;
 
 		VkApplicationInfo m_app_info;
 
@@ -42,13 +42,58 @@ namespace owd
 
 		VkResult m_create_result;
 
+		std::vector<VkExtensionProperties> m_vec_supported_ext;
+
 		vec_t<std::string> m_vec_instance_ext_name;
 
-		vec_t<std::string> m_vec_layer_name;
+		vec_t<const char*> m_vec_layer_name;
 
+		#ifdef NDEBUG
+				const bool m_should_enable_validation_layers = false;
+		#else
+				const bool m_should_enable_validation_layers = true;
+		#endif
+				
 		static c_vulkan_instance* m_singleton;
 
 		c_vulkan_instance();
+
+		/// <summary>
+		/// Get required extensions.
+		/// </summary>
+		void get_required_extensions();
+
+		/// <summary>
+		/// Get all supported extensions.
+		/// </summary>
+		void get_supported_extensions();
+
+		/// <summary>
+		/// Provide Mac OS compatibility extensions if necessary and if not done automatically in get_required_extensions.
+		/// </summary>
+		void provide_mac_compatibility();
+
+		/// <summary>
+		/// Convert stored extension data to Vulkan supported format and set create info fields.
+		/// </summary>
+		void set_create_info();
+
+		/// <summary>
+		/// Create instance.
+		/// </summary>
+		void create_instance();
+
+		/// <summary>
+		/// Check stored member validation layers support.
+		/// </summary>
+		bool check_validation_layer_support();
+
+		/// <summary>
+		/// Set validation layers
+		/// </summary>
+		void set_validation_layers();
+
+
 	};
   
    

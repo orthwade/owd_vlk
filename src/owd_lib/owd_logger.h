@@ -211,6 +211,7 @@ namespace owd
 		std::wstring_view get_name() const { return m_name; }
 
 		c_logger& operator<<(std::wstring_view _output);
+		c_logger& operator<<(std::string_view _output);
 
 		c_logger& operator<<(char _output);
 		c_logger& operator<<(wchar_t _output);

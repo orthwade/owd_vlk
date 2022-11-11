@@ -122,6 +122,20 @@ namespace owd
 
 		return *this;
 	}
+	c_logger& c_logger::operator<<(std::string_view _output)
+	{
+		if(check_mode_none())
+		{
+		}
+		else
+		{
+			std::string  str_{ _output };
+			std::wstring wstr_{ convert_utf8_to_utf16(str_) };
+
+			(*this) << std::wstring_view(wstr_);
+		}
+		return *this;
+	}
 
 	c_logger& c_logger::operator<<(char _output)
 	{
