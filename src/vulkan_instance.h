@@ -34,7 +34,7 @@ namespace owd
 
 		const char** m_glfw_ext_names;
 
-		vec_t<const char*> m_vec_glfw_ext_name;
+		vec_t<const char*> m_vec_ext_name;
 
 		VkApplicationInfo m_app_info;
 
@@ -48,12 +48,12 @@ namespace owd
 
 		vec_t<const char*> m_vec_layer_name;
 
-		#ifdef NDEBUG
-				const bool m_should_enable_validation_layers = false;
-		#else
-				const bool m_should_enable_validation_layers = true;
-		#endif
-				
+		const bool m_should_enable_validation_layers;
+
+		VkDebugUtilsMessengerCreateInfoEXT m_debug_create_info{};
+		
+		VkDebugUtilsMessengerEXT m_debug_messenger;
+		
 		static c_vulkan_instance* m_singleton;
 
 		c_vulkan_instance();
@@ -93,8 +93,8 @@ namespace owd
 		/// </summary>
 		void set_validation_layers();
 
+		void set_debug_callback();
 
+		void terminate_debug_callback();
 	};
-  
-   
 } // namespace owd
