@@ -1,5 +1,8 @@
 #pragma once
 #include <vulkan/vulkan.h>
+#include <map>
+#include <optional>
+
 #include "owd_lib.h"
 #include "glfw_init.h"
 
@@ -11,7 +14,10 @@ namespace owd
 	class c_vulkan_instance : public c_singleton
 	{
 	public:
-
+		struct s_queue_indices
+		{
+			std::optional<uint32_t> graphics_familiy;
+		};
 		/// <summary>
 		/// If not created already: create singleton and initialize Vulkan.
 		/// Get reference to singleton.
@@ -44,8 +50,6 @@ namespace owd
 
 		std::vector<VkExtensionProperties> m_vec_supported_ext;
 
-		vec_t<std::string> m_vec_instance_ext_name;
-
 		vec_t<const char*> m_vec_layer_name;
 
 		const bool m_should_enable_validation_layers;
@@ -53,7 +57,13 @@ namespace owd
 		VkDebugUtilsMessengerCreateInfoEXT m_debug_create_info{};
 		
 		VkDebugUtilsMessengerEXT m_debug_messenger;
+
+		vec_t<VkPhysicalDevice> m_vec_device;
 		
+		VkPhysicalDevice m_device;
+
+		s_queue_indices m_queue_indices;
+
 		static c_vulkan_instance* m_singleton;
 
 		c_vulkan_instance();
@@ -96,5 +106,12 @@ namespace owd
 		void set_debug_callback();
 
 		void terminate_debug_callback();
+		
+		size_t rate_device_suitability(const VkPhysicalDevice& _device);
+
+		void select_device();
+
+		s_queue_indices find_queue_families(const VkPhysicalDevice& _device);
+
 	};
 } // namespace owd

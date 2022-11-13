@@ -18,6 +18,7 @@ namespace owd
         {
             c_logger::ptr ptr_logger_ = c_logger::make(L"Vulkan debug");
             c_logger& logger_ = *ptr_logger_;
+
             logger_ << L"ERROR: Vulkan debug error: " << _callback_data->pMessage << L"\n";
             ASSERT(false);
         }
@@ -41,10 +42,6 @@ namespace owd
         m_create_info(),
         m_create_result(),
         m_vec_supported_ext(),
-        m_vec_instance_ext_name
-        ({
-            VK_EXT_DEBUG_REPORT_EXTENSION_NAME
-        }),
         m_vec_layer_name
         ({
             "VK_LAYER_KHRONOS_validation"
@@ -54,7 +51,10 @@ namespace owd
         #else
             m_should_enable_validation_layers(true),
         #endif
-        m_debug_messenger()
+        m_debug_messenger(),
+        m_vec_device(),
+        m_device(),
+        m_queue_indices()
     {
         m_glfw_init_result = c_glfw_init::init();
 
@@ -77,6 +77,8 @@ namespace owd
         create_instance();
 
         set_debug_callback();
+
+        select_device();
 
     }
 
@@ -240,6 +242,103 @@ namespace owd
             }
         }
         
+    }
+
+    size_t c_vulkan_instance::rate_device_suitability(const VkPhysicalDevice& _device)
+    {
+        size_t result = 0;
+
+        VkPhysicalDeviceProperties device_properties_;
+        VkPhysicalDeviceFeatures device_features_;
+
+        vkGetPhysicalDeviceProperties(_device, &device_properties_);
+        vkGetPhysicalDeviceFeatures(_device, &device_features_);
+
+        if (device_properties_.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+        {
+            result += 1000;
+        }
+
+        result += static_cast<size_t>(device_properties_.limits.maxImageDimension2D);
+
+        if (!device_features_.geometryShader)
+        {
+            m_logger << L"WARNING: the device doesn't have geometry shaders\n";
+            result = 0;
+            //ASSERT(false);
+        }
+
+        return result;
+    }
+
+    void c_vulkan_instance::select_device()
+    {
+        uint32_t device_count_ = 0;
+
+        vkEnumeratePhysicalDevices(m_instance, &device_count_, nullptr);
+
+        m_vec_device.resize(static_cast<size_t>(device_count_));
+
+        vkEnumeratePhysicalDevices(m_instance, &device_count_, m_vec_device.data());
+
+        std::multimap<size_t, VkPhysicalDevice> candidates_;
+
+        for (const VkPhysicalDevice& device_ : m_vec_device) 
+        {
+            size_t score_ = rate_device_suitability(device_);
+
+            candidates_.insert(std::make_pair(score_, device_));
+        }
+
+        if (candidates_.rbegin()->first > 0)
+        {
+            m_device = candidates_.rbegin()->second;
+        }
+        else
+        {
+            m_logger << L"ERROR: failed to find a suitable GPU!\n";
+            ASSERT(false);
+        }
+
+        m_queue_indices = find_queue_families(m_device);
+
+        if(!m_queue_indices.graphics_familiy.has_value())
+        {
+            m_logger << L"ERROR: not found suitable queue family.\n";
+            ASSERT(false);
+
+        }
+
+    }
+
+    c_vulkan_instance::s_queue_indices c_vulkan_instance::find_queue_families(const VkPhysicalDevice& _device)
+    {
+        c_vulkan_instance::s_queue_indices result_;
+
+        uint32_t queue_family_count_ = 0;
+        vkGetPhysicalDeviceQueueFamilyProperties(_device, &queue_family_count_, nullptr);
+
+        std::vector<VkQueueFamilyProperties> vec_queue_family_(queue_family_count_);
+        vkGetPhysicalDeviceQueueFamilyProperties(_device, &queue_family_count_, vec_queue_family_.data());
+
+        uint32_t i_ = 0;
+
+        for (const VkQueueFamilyProperties& queue_family_ : vec_queue_family_) 
+        {
+            if (result_.graphics_familiy.has_value())
+            {
+                break;
+            }
+
+            if (queue_family_.queueFlags & VK_QUEUE_GRAPHICS_BIT) 
+            {
+                result_.graphics_familiy = i_;
+            }
+
+            ++i_;
+        }
+
+        return result_;
     }
 
     void c_vulkan_instance::terminate_debug_callback()
