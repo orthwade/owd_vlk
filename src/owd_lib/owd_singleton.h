@@ -23,6 +23,7 @@ namespace owd
 
 	protected:
 		c_singleton();
+		c_singleton(wsv_t _name);
 
 		static std::list<c_singleton*> m_list_singleton;
 	};

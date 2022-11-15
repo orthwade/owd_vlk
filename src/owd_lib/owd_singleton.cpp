@@ -36,6 +36,14 @@ namespace owd
 	}
 
 	c_singleton::c_singleton()
+		:
+		c_object(L"singleton")
+	{
+		m_list_singleton.push_back(this);
+	}
+	c_singleton::c_singleton(wsv_t _name)
+		:
+		c_object(_name)
 	{
 		m_list_singleton.push_back(this);
 	}

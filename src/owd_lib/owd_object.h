@@ -3,6 +3,7 @@
 #include <string>
 
 #include "owd_logger.h"
+#include "owd_define.h"
 
 namespace owd
 {

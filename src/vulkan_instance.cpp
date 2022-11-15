@@ -52,9 +52,15 @@ namespace owd
             m_should_enable_validation_layers(true),
         #endif
         m_debug_messenger(),
-        m_vec_device(),
-        m_device(),
-        m_queue_indices()
+        m_surface(),
+        m_present_queue(),
+        m_vec_physical_device(),
+        m_physical_device(),
+        m_queue_indices(),
+        m_device_queue_create_info(),
+        m_device_create_info(),
+        m_logical_device(),
+        m_graphics_queue()
     {
         m_glfw_init_result = c_glfw_init::init();
 
@@ -78,7 +84,15 @@ namespace owd
 
         set_debug_callback();
 
+        create_surface();
+
         select_device();
+
+        create_logical_device();
+
+        create_presentation_queue();
+
+        retrieve_queue_handles();
 
     }
 
@@ -167,6 +181,11 @@ namespace owd
         }
     }
 
+    void c_vulkan_instance::destroy_instance()
+    {
+        vkDestroyInstance(m_instance, nullptr);
+    }
+
     bool c_vulkan_instance::check_validation_layer_support()
     {
         bool result = true;
@@ -244,6 +263,81 @@ namespace owd
         
     }
 
+    void c_vulkan_instance::create_surface()
+    {
+        #ifdef WIN32
+        {
+            //VkWin32SurfaceCreateInfoKHR surface_create_info_{};
+
+            //surface_create_info_.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+
+            //c_window& window_ = c_window::get();
+            //
+            //if (!window_.get_glfw_wnd_ptr())
+            //{
+            //    window_.init();
+            //}
+
+            //surface_create_info_.hwnd = glfwGetWin32Window(window_.get_glfw_wnd_ptr());
+
+            //surface_create_info_.hinstance = GetModuleHandle(nullptr);
+
+            //if (vkCreateWin32SurfaceKHR(m_instance, &surface_create_info_, nullptr, &m_surface) != VK_SUCCESS) 
+            //{
+            //    m_logger << L"ERROR: failed to create window surface!\n";
+            //    ASSERT(false);
+            //}
+        }
+        #else
+        {
+            //m_logger << L"ERROR: only WIN32 is implemented!\n";
+            //ASSERT(false);
+        }
+        #endif // WIN32
+
+        c_window& window_ = c_window::init();
+
+        GLFWwindow* ptr_glfw_window_ = window_.get_glfw_wnd_ptr();
+
+        if (glfwCreateWindowSurface(m_instance, ptr_glfw_window_, nullptr, &m_surface) != VK_SUCCESS)
+        {
+            m_logger << L"ERROR: failed to create window surface!\n";
+            ASSERT(false);
+        }
+    }
+
+    void c_vulkan_instance::destroy_surface()
+    {
+        vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
+    }
+
+    void c_vulkan_instance::create_presentation_queue()
+    {
+        std::vector<VkDeviceQueueCreateInfo> vec_queue_create_info;
+
+        vec_t<uint32_t> vec_unique_queue_families_ 
+            = { m_queue_indices.graphics_familiy.value(), m_queue_indices.present_familiy.value() };
+
+        float queuePriority = 1.0f;
+
+        for (uint32_t queueFamily : vec_unique_queue_families_) 
+        {
+            VkDeviceQueueCreateInfo queue_create_info_{};
+
+            queue_create_info_.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+            queue_create_info_.queueFamilyIndex = queueFamily;
+            queue_create_info_.queueCount = 1;
+            queue_create_info_.pQueuePriorities = &queuePriority;
+
+            vec_queue_create_info.push_back(queue_create_info_);
+        }
+
+        m_device_create_info.queueCreateInfoCount = static_cast<uint32_t>(vec_queue_create_info.size());
+        m_device_create_info.pQueueCreateInfos = vec_queue_create_info.data();
+
+        vkGetDeviceQueue(m_logical_device, m_queue_indices.present_familiy.value(), 0, &m_present_queue);
+    }
+
     size_t c_vulkan_instance::rate_device_suitability(const VkPhysicalDevice& _device)
     {
         size_t result = 0;
@@ -277,13 +371,13 @@ namespace owd
 
         vkEnumeratePhysicalDevices(m_instance, &device_count_, nullptr);
 
-        m_vec_device.resize(static_cast<size_t>(device_count_));
+        m_vec_physical_device.resize(static_cast<size_t>(device_count_));
 
-        vkEnumeratePhysicalDevices(m_instance, &device_count_, m_vec_device.data());
+        vkEnumeratePhysicalDevices(m_instance, &device_count_, m_vec_physical_device.data());
 
         std::multimap<size_t, VkPhysicalDevice> candidates_;
 
-        for (const VkPhysicalDevice& device_ : m_vec_device) 
+        for (const VkPhysicalDevice& device_ : m_vec_physical_device) 
         {
             size_t score_ = rate_device_suitability(device_);
 
@@ -292,7 +386,7 @@ namespace owd
 
         if (candidates_.rbegin()->first > 0)
         {
-            m_device = candidates_.rbegin()->second;
+            m_physical_device = candidates_.rbegin()->second;
         }
         else
         {
@@ -300,13 +394,12 @@ namespace owd
             ASSERT(false);
         }
 
-        m_queue_indices = find_queue_families(m_device);
+        m_queue_indices = find_queue_families(m_physical_device);
 
-        if(!m_queue_indices.graphics_familiy.has_value())
+        if(!m_queue_indices.is_complete())
         {
             m_logger << L"ERROR: not found suitable queue family.\n";
             ASSERT(false);
-
         }
 
     }
@@ -325,7 +418,8 @@ namespace owd
 
         for (const VkQueueFamilyProperties& queue_family_ : vec_queue_family_) 
         {
-            if (result_.graphics_familiy.has_value())
+
+            if (result_.is_complete())
             {
                 break;
             }
@@ -333,12 +427,69 @@ namespace owd
             if (queue_family_.queueFlags & VK_QUEUE_GRAPHICS_BIT) 
             {
                 result_.graphics_familiy = i_;
+
+                VkBool32 present_support_ = false;
+
+                vkGetPhysicalDeviceSurfaceSupportKHR(m_physical_device, i_, m_surface, &present_support_);
+
+                if (present_support_)
+                {
+                    result_.present_familiy = i_;
+                }
             }
 
             ++i_;
         }
 
         return result_;
+    }
+
+    void c_vulkan_instance::create_logical_device()
+    {
+        float queue_priority_ = 1.0f;
+
+        m_device_queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        m_device_queue_create_info.queueFamilyIndex = m_queue_indices.graphics_familiy.value();
+        m_device_queue_create_info.queueCount = 1;
+        m_device_queue_create_info.pQueuePriorities = &queue_priority_;
+
+        VkPhysicalDeviceFeatures device_features_{};
+
+        m_device_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+
+        m_device_create_info.pQueueCreateInfos = &m_device_queue_create_info;
+        m_device_create_info.queueCreateInfoCount = 1;
+
+        m_device_create_info.pEnabledFeatures = &device_features_;
+
+        m_device_create_info.enabledExtensionCount = 0;
+
+        if (m_should_enable_validation_layers) 
+        {
+            m_device_create_info.enabledLayerCount = static_cast<uint32_t>(m_vec_layer_name.size());
+            m_device_create_info.ppEnabledLayerNames = m_vec_layer_name.data();
+        }
+        else 
+        {
+            m_device_create_info.enabledLayerCount = 0;
+        }
+
+        if (vkCreateDevice(m_physical_device, &m_device_create_info, nullptr, &m_logical_device) != VK_SUCCESS) 
+        {
+            m_logger << L"ERROR: failed to create logical device!\n";
+            ASSERT(false);
+        }
+
+    }
+
+    void c_vulkan_instance::destroy_logical_device()
+    {
+        vkDestroyDevice(m_logical_device, nullptr);
+    }
+
+    void c_vulkan_instance::retrieve_queue_handles()
+    {
+        vkGetDeviceQueue(m_logical_device, m_queue_indices.graphics_familiy.value(), 0, &m_graphics_queue);
     }
 
     void c_vulkan_instance::terminate_debug_callback()
@@ -356,7 +507,13 @@ namespace owd
     {
         if (m_singleton)
         {
+            destroy_surface();
+
             terminate_debug_callback();
+            
+            destroy_logical_device();
+
+            destroy_instance();
 
             m_list_singleton.remove(m_singleton);
 

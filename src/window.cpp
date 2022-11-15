@@ -4,16 +4,15 @@ namespace owd
 {
     c_window *c_window::m_singleton{};
 
-    void c_window::init(int32_t _w, int32_t _h, std::string_view _name,
+    c_window& c_window::init(int32_t _w, int32_t _h, wsv_t _name,
                         const std::vector<s_wnd_hint> &_vec_hint)
     {
-        GLFW_CALL(glfwDestroyWindow(m_glfw_wnd));
-
-        for (const s_wnd_hint &hint_ : _vec_hint)
-            GLFW_CALL(glfwWindowHint(hint_.hint_id, hint_.value));
-
-
-        GLFW_CALL(m_glfw_wnd = glfwCreateWindow(_w, _h, _name.data(), nullptr, nullptr));
+        if (!m_singleton)
+        {
+            m_singleton = new c_window(_w, _h, _name, _vec_hint);
+        }
+        
+        return *m_singleton;
     }
 
     void c_window::set_func_update_window(const std::function<void()>& _func)
@@ -60,11 +59,20 @@ namespace owd
         }
     }
 
-    c_window::c_window()
+    c_window::c_window(int32_t _w, int32_t _h, wsv_t _name,
+        const std::vector<s_wnd_hint>& _vec_hint)
         :
-        c_singleton(),
+        c_singleton(_name),
         m_func_update_window(std::bind(&c_window::default_func_update_window, this)),
-        m_glfw_wnd()
+        m_glfw_wnd(nullptr)
     {
+        c_glfw_init::init();
+
+        for (const s_wnd_hint& hint_ : _vec_hint)
+            GLFW_CALL(glfwWindowHint(hint_.hint_id, hint_.value));
+
+        std::string str_name_{ convert_utf16_to_utf8(_name) };
+
+        GLFW_CALL(m_glfw_wnd = glfwCreateWindow(_w, _h, str_name_.data(), nullptr, nullptr));
     }
 } // namespace owd
