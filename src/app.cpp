@@ -19,12 +19,11 @@ namespace owd
         :
         c_singleton(),
         m_glfw_errors(c_glfw_errors::get_ptr()),
+        m_monitors(&c_monitors::get()),
         m_shaders(c_shaders::get_ptr()),
         m_window(&c_window::init()),
         m_vulkan_instance(&c_vulkan_instance::init())
     {
-        c_glfw_init::init();
-        m_monitors = &c_monitors::get();
     }
 
     c_app::~c_app()

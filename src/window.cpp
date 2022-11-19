@@ -64,11 +64,12 @@ namespace owd
         :
         c_singleton(_name),
         m_func_update_window(std::bind(&c_window::default_func_update_window, this)),
-        m_glfw_wnd(nullptr)
+        m_glfw_wnd(nullptr),
+        m_vec_hint(_vec_hint.begin(), _vec_hint.end())
     {
         c_glfw_init::init();
 
-        for (const s_wnd_hint& hint_ : _vec_hint)
+        for (const s_wnd_hint& hint_ : m_vec_hint)
             GLFW_CALL(glfwWindowHint(hint_.hint_id, hint_.value));
 
         std::string str_name_{ convert_utf16_to_utf8(_name) };

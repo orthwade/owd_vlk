@@ -62,7 +62,7 @@ namespace owd
 
 		const char** m_glfw_ext_names;
 
-		vec_t<const char*> m_vec_ext_name;
+		vec_t<const char*> m_vec_instance_ext_name;
 
 		VkApplicationInfo m_app_info;
 
@@ -105,7 +105,7 @@ namespace owd
 		/// <summary>
 		/// Get required extensions.
 		/// </summary>
-		void get_required_extensions();
+		void get_required_instance_ext();
 
 		/// <summary>
 		/// Get all supported extensions.

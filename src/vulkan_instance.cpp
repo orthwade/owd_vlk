@@ -37,7 +37,7 @@ namespace owd
         m_glfw_init_result(),
         m_glfw_ext_count(),
         m_glfw_ext_names(),
-        m_vec_ext_name(),
+        m_vec_instance_ext_name(),
         m_app_info(),
         m_create_info(),
         m_create_result(),
@@ -64,7 +64,7 @@ namespace owd
     {
         m_glfw_init_result = c_glfw_init::init();
 
-        get_required_extensions();
+        get_required_instance_ext();
 
         get_supported_extensions();
 
@@ -96,18 +96,18 @@ namespace owd
 
     }
 
-    void c_vulkan_instance::get_required_extensions()
+    void c_vulkan_instance::get_required_instance_ext()
     {
         GLFW_CALL(m_glfw_ext_names = glfwGetRequiredInstanceExtensions(&m_glfw_ext_count));
 
         for (size_t i_ = 0; i_ < m_glfw_ext_count; ++i_)
         {
-            m_vec_ext_name.push_back((m_glfw_ext_names[i_]));
+            m_vec_instance_ext_name.push_back((m_glfw_ext_names[i_]));
         }
 
         if (m_should_enable_validation_layers)
         {
-            m_vec_ext_name.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+            m_vec_instance_ext_name.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
         }
     }
 
@@ -117,7 +117,7 @@ namespace owd
 
         vkEnumerateInstanceExtensionProperties(nullptr, &supported_ext_count_, nullptr);
 
-        std::vector<VkExtensionProperties> m_vec_supported_ext(supported_ext_count_);
+        m_vec_supported_ext.resize(supported_ext_count_);
 
         vkEnumerateInstanceExtensionProperties(nullptr, &supported_ext_count_, m_vec_supported_ext.data());
     }
@@ -141,7 +141,7 @@ namespace owd
 
         if (mac_ext_supported_)
         {
-            for (const std::string& ext_ : m_vec_ext_name)
+            for (const std::string& ext_ : m_vec_instance_ext_name)
             {
                 if (ext_ == VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME)
                 {
@@ -158,7 +158,7 @@ namespace owd
 
         if (add_mac_ext_manually_)
         {
-            m_vec_ext_name.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+            m_vec_instance_ext_name.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
 
             m_create_info.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
         }
@@ -166,8 +166,8 @@ namespace owd
 
     void c_vulkan_instance::set_create_info()
     {
-        m_create_info.enabledExtensionCount = static_cast<uint32_t>(m_vec_ext_name.size());
-        m_create_info.ppEnabledExtensionNames = m_vec_ext_name.data();
+        m_create_info.enabledExtensionCount = static_cast<uint32_t>(m_vec_instance_ext_name.size());
+        m_create_info.ppEnabledExtensionNames = m_vec_instance_ext_name.data();
     }
 
     void c_vulkan_instance::create_instance()
@@ -359,7 +359,7 @@ namespace owd
         {
             m_logger << L"WARNING: the device doesn't have geometry shaders\n";
             result = 0;
-            //ASSERT(false);
+            ASSERT(false);
         }
 
         return result;

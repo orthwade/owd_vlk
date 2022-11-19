@@ -79,6 +79,8 @@ namespace owd
 
         GLFWwindow* m_glfw_wnd;
 
+        vec_t<s_wnd_hint> m_vec_hint;
+
         void default_func_update_window();
 
         //std::vector<c_monitor::ptr> m_vec_monitor;
