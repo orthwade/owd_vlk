@@ -40,6 +40,18 @@ namespace owd
 
 			inline bool is_complete() const { return graphics_familiy.has_value() && present_familiy.has_value(); }
 		};
+
+		struct s_swap_chain_and_khr_surface_details 
+		{
+			VkSurfaceCapabilitiesKHR capabilities;
+		
+			vec_t<VkSurfaceFormatKHR> vec_format;
+			
+			vec_t<VkPresentModeKHR> vec_present_mode;
+		};
+
+		using s_sc_khr_t = s_swap_chain_and_khr_surface_details;
+
 		/// <summary>
 		/// If not created already: create singleton and initialize Vulkan.
 		/// Get reference to singleton.
@@ -50,6 +62,11 @@ namespace owd
 		/// Terminate vulkan and delete singleton.
 		/// </summary>
 		void terminate() override;
+
+		/// <summary>
+		/// Automatically select and set up best device.
+		/// </summary>
+		bool select_best_device();
 
 	protected:
 		c_logger m_logger;
@@ -66,11 +83,11 @@ namespace owd
 
 		VkApplicationInfo m_app_info;
 
-		VkInstanceCreateInfo m_create_info;
+		VkInstanceCreateInfo m_instance_create_info;
 
-		VkResult m_create_result;
+		VkResult m_instance_create_result;
 
-		std::vector<VkExtensionProperties> m_vec_supported_ext;
+		std::vector<VkExtensionProperties> m_vec_supported_instance_ext;
 
 		vec_t<const char*> m_vec_layer_name;
 
@@ -85,6 +102,8 @@ namespace owd
 		VkQueue m_present_queue;
 
 		vec_t<VkPhysicalDevice> m_vec_physical_device;
+
+		mmap_t<size_t, VkPhysicalDevice> m_mmap_phys_device_candidate;
 		
 		VkPhysicalDevice m_physical_device;
 
@@ -92,11 +111,15 @@ namespace owd
 
 		VkDeviceQueueCreateInfo m_device_queue_create_info;
 
-		VkDeviceCreateInfo m_device_create_info;
+		VkDeviceCreateInfo m_logical_device_create_info;
+
+		vec_t<const char*> m_vec_logical_device_ext_name;
 
 		VkDevice m_logical_device;
 
 		VkQueue m_graphics_queue;
+
+		s_sc_khr_t m_sc_khr;
 
 		static c_vulkan_instance* m_singleton;
 
@@ -151,15 +174,23 @@ namespace owd
 		
 		size_t rate_device_suitability(const VkPhysicalDevice& _device);
 
-		void select_device();
+		void list_physical_devices();
+
+		bool select_physical_device(const std::pair<size_t, VkPhysicalDevice>& _candidate);
 
 		s_queue_indices find_queue_families(const VkPhysicalDevice& _device);
 
-		void create_logical_device();
+		bool add_swap_chain_support();
+
+		bool create_logical_device();
 
 		void destroy_logical_device();
 
 		void retrieve_queue_handles();
+
+		s_sc_khr_t get_swap_chain_and_khr_surface_details();
+
+		bool check_swap_chain_support();
 
 		
 

@@ -39,9 +39,9 @@ namespace owd
         m_glfw_ext_names(),
         m_vec_instance_ext_name(),
         m_app_info(),
-        m_create_info(),
-        m_create_result(),
-        m_vec_supported_ext(),
+        m_instance_create_info(),
+        m_instance_create_result(),
+        m_vec_supported_instance_ext(),
         m_vec_layer_name
         ({
             "VK_LAYER_KHRONOS_validation"
@@ -58,9 +58,11 @@ namespace owd
         m_physical_device(),
         m_queue_indices(),
         m_device_queue_create_info(),
-        m_device_create_info(),
+        m_logical_device_create_info(),
+        m_vec_logical_device_ext_name(),
         m_logical_device(),
-        m_graphics_queue()
+        m_graphics_queue(),
+        m_sc_khr()
     {
         m_glfw_init_result = c_glfw_init::init();
 
@@ -86,14 +88,7 @@ namespace owd
 
         create_surface();
 
-        select_device();
-
-        create_logical_device();
-
-        create_presentation_queue();
-
-        retrieve_queue_handles();
-
+        list_physical_devices();
     }
 
     void c_vulkan_instance::get_required_instance_ext()
@@ -117,9 +112,9 @@ namespace owd
 
         vkEnumerateInstanceExtensionProperties(nullptr, &supported_ext_count_, nullptr);
 
-        m_vec_supported_ext.resize(supported_ext_count_);
+        m_vec_supported_instance_ext.resize(supported_ext_count_);
 
-        vkEnumerateInstanceExtensionProperties(nullptr, &supported_ext_count_, m_vec_supported_ext.data());
+        vkEnumerateInstanceExtensionProperties(nullptr, &supported_ext_count_, m_vec_supported_instance_ext.data());
     }
 
     void c_vulkan_instance::provide_mac_compatibility()
@@ -130,7 +125,7 @@ namespace owd
 
         bool add_mac_ext_manually_ = false;
 
-        for (const VkExtensionProperties& supported_ext_ : m_vec_supported_ext)
+        for (const VkExtensionProperties& supported_ext_ : m_vec_supported_instance_ext)
         {
             if (supported_ext_.extensionName == VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME)
             {
@@ -160,21 +155,21 @@ namespace owd
         {
             m_vec_instance_ext_name.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
 
-            m_create_info.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+            m_instance_create_info.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
         }
     }
 
     void c_vulkan_instance::set_create_info()
     {
-        m_create_info.enabledExtensionCount = static_cast<uint32_t>(m_vec_instance_ext_name.size());
-        m_create_info.ppEnabledExtensionNames = m_vec_instance_ext_name.data();
+        m_instance_create_info.enabledExtensionCount = static_cast<uint32_t>(m_vec_instance_ext_name.size());
+        m_instance_create_info.ppEnabledExtensionNames = m_vec_instance_ext_name.data();
     }
 
     void c_vulkan_instance::create_instance()
     {
-        m_create_result = vkCreateInstance(&m_create_info, nullptr, &m_instance);
+        m_instance_create_result = vkCreateInstance(&m_instance_create_info, nullptr, &m_instance);
 
-        if (m_create_result != VK_SUCCESS)
+        if (m_instance_create_result != VK_SUCCESS)
         {
             m_logger << L"ERROR: failed to create instance!\n";
             throw std::runtime_error("");
@@ -224,8 +219,8 @@ namespace owd
 
     void c_vulkan_instance::set_validation_layers()
     {
-        m_create_info.enabledLayerCount = static_cast<uint32_t>(m_vec_layer_name.size());
-        m_create_info.ppEnabledLayerNames = m_vec_layer_name.data();
+        m_instance_create_info.enabledLayerCount = static_cast<uint32_t>(m_vec_layer_name.size());
+        m_instance_create_info.ppEnabledLayerNames = m_vec_layer_name.data();
     }
 
     void c_vulkan_instance::set_debug_callback()
@@ -332,10 +327,9 @@ namespace owd
             vec_queue_create_info.push_back(queue_create_info_);
         }
 
-        m_device_create_info.queueCreateInfoCount = static_cast<uint32_t>(vec_queue_create_info.size());
-        m_device_create_info.pQueueCreateInfos = vec_queue_create_info.data();
+        m_logical_device_create_info.queueCreateInfoCount = static_cast<uint32_t>(vec_queue_create_info.size());
+        m_logical_device_create_info.pQueueCreateInfos = vec_queue_create_info.data();
 
-        vkGetDeviceQueue(m_logical_device, m_queue_indices.present_familiy.value(), 0, &m_present_queue);
     }
 
     size_t c_vulkan_instance::rate_device_suitability(const VkPhysicalDevice& _device)
@@ -365,7 +359,7 @@ namespace owd
         return result;
     }
 
-    void c_vulkan_instance::select_device()
+    void c_vulkan_instance::list_physical_devices()
     {
         uint32_t device_count_ = 0;
 
@@ -375,33 +369,42 @@ namespace owd
 
         vkEnumeratePhysicalDevices(m_instance, &device_count_, m_vec_physical_device.data());
 
-        std::multimap<size_t, VkPhysicalDevice> candidates_;
-
-        for (const VkPhysicalDevice& device_ : m_vec_physical_device) 
+        for (const VkPhysicalDevice& device_ : m_vec_physical_device)
         {
             size_t score_ = rate_device_suitability(device_);
 
-            candidates_.insert(std::make_pair(score_, device_));
+            m_mmap_phys_device_candidate.insert(std::make_pair(score_, device_));
         }
+    }
 
-        if (candidates_.rbegin()->first > 0)
+
+    bool c_vulkan_instance::select_physical_device(const std::pair<size_t, VkPhysicalDevice>& _candidate)
+    {
+        bool result = false;
+
+        if (_candidate.first > 0)
         {
-            m_physical_device = candidates_.rbegin()->second;
+            m_physical_device = _candidate.second;
+
+            m_queue_indices = find_queue_families(m_physical_device);
+
+            if (!m_queue_indices.is_complete())
+            {
+                m_logger << L"ERROR: not found suitable queue family.\n";
+                //ASSERT(false);
+            }
+            else
+            {
+                result = true;
+            }
         }
         else
         {
             m_logger << L"ERROR: failed to find a suitable GPU!\n";
-            ASSERT(false);
+            //ASSERT(false);
         }
-
-        m_queue_indices = find_queue_families(m_physical_device);
-
-        if(!m_queue_indices.is_complete())
-        {
-            m_logger << L"ERROR: not found suitable queue family.\n";
-            ASSERT(false);
-        }
-
+        
+        return result;
     }
 
     c_vulkan_instance::s_queue_indices c_vulkan_instance::find_queue_families(const VkPhysicalDevice& _device)
@@ -444,8 +447,51 @@ namespace owd
         return result_;
     }
 
-    void c_vulkan_instance::create_logical_device()
+    bool c_vulkan_instance::add_swap_chain_support()
     {
+        bool result = false;
+
+        m_vec_logical_device_ext_name.push_back("VK_KHR_swapchain");
+
+        uint32_t extension_count_;
+        vkEnumerateDeviceExtensionProperties(m_physical_device, nullptr, &extension_count_, nullptr);
+
+        std::vector<VkExtensionProperties> vec_available_ext_(extension_count_);
+        vkEnumerateDeviceExtensionProperties(m_physical_device, nullptr, &extension_count_, vec_available_ext_.data());
+
+        bool found = false;
+
+        for (const VkExtensionProperties& ext : vec_available_ext_)
+        {
+            if (sv_t(ext.extensionName) == sv_t(m_vec_logical_device_ext_name.back()))
+            {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found)
+        {
+            m_logger << L"ERROR: swapchain is not supported.\n";
+            ASSERT(false);
+        }
+        else
+        {
+            result = true;
+        }
+
+        m_logical_device_create_info.enabledExtensionCount 
+            = static_cast<uint32_t>(m_vec_logical_device_ext_name.size());
+        
+        m_logical_device_create_info.ppEnabledExtensionNames = m_vec_logical_device_ext_name.data();
+
+        return result;
+    }
+
+    bool c_vulkan_instance::create_logical_device()
+    {
+        bool result = false;
+
         float queue_priority_ = 1.0f;
 
         m_device_queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
@@ -455,31 +501,39 @@ namespace owd
 
         VkPhysicalDeviceFeatures device_features_{};
 
-        m_device_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+        m_logical_device_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 
-        m_device_create_info.pQueueCreateInfos = &m_device_queue_create_info;
-        m_device_create_info.queueCreateInfoCount = 1;
+        m_logical_device_create_info.pQueueCreateInfos = &m_device_queue_create_info;
+        m_logical_device_create_info.queueCreateInfoCount = 1;
 
-        m_device_create_info.pEnabledFeatures = &device_features_;
+        m_logical_device_create_info.pEnabledFeatures = &device_features_;
 
-        m_device_create_info.enabledExtensionCount = 0;
+        m_logical_device_create_info.enabledExtensionCount = 0;
 
         if (m_should_enable_validation_layers) 
         {
-            m_device_create_info.enabledLayerCount = static_cast<uint32_t>(m_vec_layer_name.size());
-            m_device_create_info.ppEnabledLayerNames = m_vec_layer_name.data();
+            m_logical_device_create_info.enabledLayerCount = static_cast<uint32_t>(m_vec_layer_name.size());
+            m_logical_device_create_info.ppEnabledLayerNames = m_vec_layer_name.data();
         }
         else 
         {
-            m_device_create_info.enabledLayerCount = 0;
+            m_logical_device_create_info.enabledLayerCount = 0;
         }
 
-        if (vkCreateDevice(m_physical_device, &m_device_create_info, nullptr, &m_logical_device) != VK_SUCCESS) 
+        if (add_swap_chain_support())
         {
-            m_logger << L"ERROR: failed to create logical device!\n";
-            ASSERT(false);
+            if (vkCreateDevice(m_physical_device, &m_logical_device_create_info, nullptr, &m_logical_device) != VK_SUCCESS)
+            {
+                m_logger << L"ERROR: failed to create logical device!\n";
+                //ASSERT(false);
+            }
+            else
+            {
+                result = true;
+            }
         }
 
+        return result;
     }
 
     void c_vulkan_instance::destroy_logical_device()
@@ -490,6 +544,95 @@ namespace owd
     void c_vulkan_instance::retrieve_queue_handles()
     {
         vkGetDeviceQueue(m_logical_device, m_queue_indices.graphics_familiy.value(), 0, &m_graphics_queue);
+    }
+
+    c_vulkan_instance::s_sc_khr_t c_vulkan_instance::get_swap_chain_and_khr_surface_details()
+    {
+        c_vulkan_instance::s_sc_khr_t result{};
+
+        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physical_device, m_surface, &result.capabilities);
+
+        uint32_t format_count_ = 0;
+
+        vkGetPhysicalDeviceSurfaceFormatsKHR(m_physical_device, m_surface, &format_count_, nullptr);
+
+        result.vec_format.resize(format_count_);
+
+        if (!result.vec_format.empty())
+        {
+            vkGetPhysicalDeviceSurfaceFormatsKHR
+            (m_physical_device, m_surface, &format_count_, result.vec_format.data());
+        }
+
+        uint32_t present_mode_count_ = 0;
+
+        vkGetPhysicalDeviceSurfacePresentModesKHR(m_physical_device, m_surface, &present_mode_count_, nullptr);
+
+        result.vec_present_mode.resize(present_mode_count_);
+
+        if (!result.vec_present_mode.empty())
+        {
+            vkGetPhysicalDeviceSurfacePresentModesKHR
+            (m_physical_device, m_surface, &present_mode_count_, result.vec_present_mode.data());
+        }
+
+        return result;
+    }
+
+    bool c_vulkan_instance::check_swap_chain_support()
+    {
+        bool result = false;
+
+        if (m_sc_khr.vec_format.empty())
+        {
+            m_logger << "ERROR: no supported surface formats\n";
+            //ASSERT(false);
+        }
+        else if (m_sc_khr.vec_present_mode.empty())
+        {
+            m_logger << "ERROR: no supported present mode\n";
+            //ASSERT(false);
+        }
+        else
+        {
+            result = true;
+        }
+
+        return result;
+
+    }
+
+    bool c_vulkan_instance::select_best_device()
+    {
+        bool result = false;
+
+        for (auto iter = m_mmap_phys_device_candidate.rbegin(); iter != m_mmap_phys_device_candidate.rend(); ++iter)
+        {
+            if (!select_physical_device(*iter))
+            {
+                continue;
+            }
+
+            if (!create_logical_device())
+            {
+                continue;
+            }
+
+            create_presentation_queue();
+
+            retrieve_queue_handles();
+
+            m_sc_khr = get_swap_chain_and_khr_surface_details();
+            
+            if (check_swap_chain_support())
+            {
+                result = true;
+
+                break;
+            }
+        }
+
+        return result;
     }
 
     void c_vulkan_instance::terminate_debug_callback()

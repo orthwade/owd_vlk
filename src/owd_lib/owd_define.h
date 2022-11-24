@@ -3,6 +3,7 @@
 #include <string_view>
 #include <unordered_map>
 #include <memory>
+#include <map>
 
 namespace owd
 {
@@ -11,6 +12,9 @@ namespace owd
 
 	template<class T>
 	using list_t = std::list<T>;
+
+	template<class T1, class T2>
+	using mmap_t = std::multimap<T1, T2>;
 
 	template<class T1, class T2>
 	using umap_t = std::unordered_map<T1, T2>;
@@ -22,5 +26,6 @@ namespace owd
 
 	typedef vec_t<byte_t> vec_byte_t;
 
+	typedef std::string_view sv_t;
 	typedef std::wstring_view wsv_t;
 } // namespace owd

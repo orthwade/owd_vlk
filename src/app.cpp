@@ -24,6 +24,16 @@ namespace owd
         m_window(&c_window::init()),
         m_vulkan_instance(&c_vulkan_instance::init())
     {
+        if (m_vulkan_instance->select_best_device())
+        {
+            m_logger << "SUCCESS: selecting best graphic device successful\n";
+        }
+        else
+        {
+            m_logger << "ERROR: selecting best graphic device failed\n";
+            ASSERT(false);
+        }
+        
     }
 
     c_app::~c_app()
