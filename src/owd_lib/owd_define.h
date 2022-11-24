@@ -7,6 +7,8 @@
 
 namespace owd
 {
+	using idx_t = size_t;
+
 	template<class T>
 	using vec_t = std::vector<T>;
 

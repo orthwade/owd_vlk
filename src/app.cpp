@@ -8,6 +8,11 @@ namespace owd
     { 
         if (m_singleton)
         {
+            m_window->terminate();
+            c_glfw_init::terminate();
+            
+            m_vulkan_instance->terminate();
+
             m_list_singleton.remove(m_singleton);
 
             delete m_singleton;
@@ -24,6 +29,8 @@ namespace owd
         m_window(&c_window::init()),
         m_vulkan_instance(&c_vulkan_instance::init())
     {
+        m_vulkan_instance->print_all_phys_devices_info();
+
         if (m_vulkan_instance->select_best_device())
         {
             m_logger << "SUCCESS: selecting best graphic device successful\n";
@@ -38,8 +45,7 @@ namespace owd
 
     c_app::~c_app()
     {
-        m_window->terminate();
-        c_glfw_init::terminate();
+        
     }
 
 } //namespace owd

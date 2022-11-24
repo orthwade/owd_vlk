@@ -56,6 +56,7 @@ namespace owd
         m_present_queue(),
         m_vec_physical_device(),
         m_physical_device(),
+        m_vec_phys_device_info(),
         m_queue_indices(),
         m_device_queue_create_info(),
         m_logical_device_create_info(),
@@ -375,6 +376,24 @@ namespace owd
 
             m_mmap_phys_device_candidate.insert(std::make_pair(score_, device_));
         }
+
+        idx_t index = 0;
+
+        for (auto iter = m_mmap_phys_device_candidate.rbegin(); iter != m_mmap_phys_device_candidate.rend(); ++iter)
+        {
+            VkPhysicalDeviceProperties device_properties_;
+            VkPhysicalDeviceFeatures device_features_;
+
+            vkGetPhysicalDeviceProperties(iter->second, &device_properties_);
+
+            s_phys_device_info phys_device_info_{};
+            
+            phys_device_info_.name  = device_properties_.deviceName;
+            phys_device_info_.id    = device_properties_.deviceID;
+            phys_device_info_.index = index;
+
+            ++index;
+        }
     }
 
 
@@ -608,6 +627,8 @@ namespace owd
 
         for (auto iter = m_mmap_phys_device_candidate.rbegin(); iter != m_mmap_phys_device_candidate.rend(); ++iter)
         {
+            print_phys_device_info(iter->second);
+
             if (!select_physical_device(*iter))
             {
                 continue;
@@ -633,6 +654,92 @@ namespace owd
         }
 
         return result;
+    }
+
+    bool c_vulkan_instance::select_device(idx_t _device_index)
+    {
+        bool result = false;
+
+        m_logger << "Selecting device with index: " << _device_index << '\n';
+
+        if (!m_vec_phys_device_info.empty())
+        {
+            if (_device_index < m_vec_phys_device_info.size())
+            {
+                idx_t index_ = 0;
+
+                auto iter = m_mmap_phys_device_candidate.rbegin();
+
+                for (; iter != m_mmap_phys_device_candidate.rend(); ++iter)
+                {
+                    if (_device_index == index_)
+                    {
+                        break;
+                    }
+                }
+
+                print_phys_device_info(iter->second);
+
+                if (select_physical_device(*iter))
+                {
+                    if (create_logical_device())
+                    {
+                        create_presentation_queue();
+
+                        retrieve_queue_handles();
+
+                        m_sc_khr = get_swap_chain_and_khr_surface_details();
+
+                        if (check_swap_chain_support())
+                        {
+                            result = true;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                m_logger << "ERROR: index " << _device_index << " is out of scope\n";
+            }
+        }
+        else
+        {
+            m_logger << "ERROR: no supported diveces\n";
+            //ASSERT(false);
+        }
+
+        return result;
+    }
+
+    bool c_vulkan_instance::print_phys_device_info(const VkPhysicalDevice& _phys_device)
+    {
+        bool result = true;
+
+        VkPhysicalDeviceProperties device_properties_;
+        VkPhysicalDeviceFeatures device_features_;
+
+        vkGetPhysicalDeviceProperties(_phys_device, &device_properties_);
+        vkGetPhysicalDeviceFeatures(_phys_device, &device_features_);
+        
+        m_logger << "Device name: " << device_properties_.deviceName << '\n';
+        m_logger << "Device ID: " << device_properties_.deviceID << '\n';
+
+        return result;
+    }
+
+    bool c_vulkan_instance::print_all_phys_devices_info()
+    {
+        bool result_ = true;
+
+        idx_t index_ = 0;
+
+        for (auto& iter = m_mmap_phys_device_candidate.rbegin(); iter != m_mmap_phys_device_candidate.rend(); ++iter)
+        {
+            print_phys_device_info(iter->second);
+            m_logger << "Device index: " << index_ << '\n';
+        }
+
+        return result_;
     }
 
     void c_vulkan_instance::terminate_debug_callback()

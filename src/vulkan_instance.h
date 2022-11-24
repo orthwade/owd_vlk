@@ -50,6 +50,13 @@ namespace owd
 			vec_t<VkPresentModeKHR> vec_present_mode;
 		};
 
+		struct s_phys_device_info
+		{
+			std::string name;
+			uint32_t	id;
+			idx_t		index;
+		};
+
 		using s_sc_khr_t = s_swap_chain_and_khr_surface_details;
 
 		/// <summary>
@@ -66,7 +73,31 @@ namespace owd
 		/// <summary>
 		/// Automatically select and set up best device.
 		/// </summary>
+		/// <returns>true if succesfull; false, if no suitable device was found.</returns>
 		bool select_best_device();
+
+		/// <summary>
+		/// Select physical device with index. 
+		/// Index can be retrieved with print_all_phys_devices_info or get_vec_phys_device_info.
+		/// </summary>
+		bool select_device(idx_t _device_index);
+
+		/// <summary>
+		/// Print physical device name and ID.
+		/// </summary>
+		/// <param name="_phys_device"></param>
+		/// <returns></returns>
+		bool print_phys_device_info(const VkPhysicalDevice& _phys_device);
+
+		/// <summary>
+		/// Print all physical devices name, ID and index.
+		/// </summary>
+		bool print_all_phys_devices_info();
+
+		/// <summary>
+		/// Get vector of physical device info.
+		/// </summary>
+		const vec_t<s_phys_device_info>& get_vec_phys_device_info() const { return m_vec_phys_device_info; }
 
 	protected:
 		c_logger m_logger;
@@ -106,6 +137,8 @@ namespace owd
 		mmap_t<size_t, VkPhysicalDevice> m_mmap_phys_device_candidate;
 		
 		VkPhysicalDevice m_physical_device;
+
+		vec_t<s_phys_device_info> m_vec_phys_device_info;
 
 		s_queue_indices m_queue_indices;
 
