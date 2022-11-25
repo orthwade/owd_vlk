@@ -1,9 +1,13 @@
 #pragma once 
+
 #include <vector>
 #include <string_view>
 #include <unordered_map>
 #include <memory>
 #include <map>
+#include <cstdint> 
+#include <limits> 
+#include <algorithm>
 
 namespace owd
 {

@@ -46,6 +46,15 @@ namespace owd
     {
     }
 
+    c_window::s_frame_buffer c_window::get_frame_buffer()
+    {
+        c_window::s_frame_buffer result_{};
+
+        glfwGetFramebufferSize(m_glfw_wnd, &result_.w, &result_.h);
+
+        return result_;
+    }
+
     void c_window::terminate()
     {
         if (m_singleton)

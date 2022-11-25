@@ -1,4 +1,5 @@
 #pragma once
+#define NOMINMAX 
 
 #ifdef WIN32
 #ifndef VK_USE_PLATFORM_WIN32_KHR
@@ -58,6 +59,8 @@ namespace owd
 		};
 
 		using s_sc_khr_t = s_swap_chain_and_khr_surface_details;
+
+		using surface_format_t = VkSurfaceFormatKHR;
 
 		/// <summary>
 		/// If not created already: create singleton and initialize Vulkan.
@@ -154,6 +157,8 @@ namespace owd
 
 		s_sc_khr_t m_sc_khr;
 
+		VkSwapchainKHR m_swap_chain;
+
 		static c_vulkan_instance* m_singleton;
 
 		c_vulkan_instance();
@@ -225,8 +230,15 @@ namespace owd
 
 		bool check_swap_chain_support();
 
-		
+		VkSurfaceFormatKHR	choose_surface_format(const vec_t<VkSurfaceFormatKHR>& _vec_format);
+		VkPresentModeKHR	choose_swap_present_mode(const std::vector<VkPresentModeKHR>& _vec_mode);
+		VkExtent2D			choose_swap_extent(const VkSurfaceCapabilitiesKHR& _capabilities);
 
+		bool create_swapchain();
+
+		void destroy_swapchain();
+
+		
 
 	};
 } // namespace owd

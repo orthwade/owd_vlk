@@ -63,7 +63,8 @@ namespace owd
         m_vec_logical_device_ext_name(),
         m_logical_device(),
         m_graphics_queue(),
-        m_sc_khr()
+        m_sc_khr(),
+        m_swap_chain()
     {
         m_glfw_init_result = c_glfw_init::init();
 
@@ -621,6 +622,148 @@ namespace owd
 
     }
 
+    c_vulkan_instance::surface_format_t c_vulkan_instance::choose_surface_format(const vec_t<VkSurfaceFormatKHR>& _vec_format)
+    {
+        c_vulkan_instance::surface_format_t result_{};
+
+        for (const c_vulkan_instance::surface_format_t& format_ : _vec_format)
+        {
+            if (    format_.colorSpace  == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR
+                &&  format_.format      == VK_FORMAT_B8G8R8A8_SRGB)
+            {
+                result_ = format_;
+
+                break;
+            }
+        }
+
+        return result_;
+    }
+
+    VkPresentModeKHR c_vulkan_instance::choose_swap_present_mode(const std::vector<VkPresentModeKHR>& _vec_mode)
+    {
+        VkPresentModeKHR result_{ VK_PRESENT_MODE_MAX_ENUM_KHR };
+
+        for (const VkPresentModeKHR& mode_ : _vec_mode)
+        {
+            if (mode_ == VK_PRESENT_MODE_MAILBOX_KHR)
+            {
+                result_ = mode_;
+
+                break;
+            }
+        }
+
+        if (result_ == VK_PRESENT_MODE_MAX_ENUM_KHR)
+        {
+            result_ = VkPresentModeKHR::VK_PRESENT_MODE_FIFO_KHR;
+        }
+
+        return result_;
+    }
+
+    VkExtent2D c_vulkan_instance::choose_swap_extent(const VkSurfaceCapabilitiesKHR& _capabilities)
+    {
+        VkExtent2D result_{};
+
+        if (_capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) 
+        {
+            result_ = _capabilities.currentExtent;
+        }
+        else
+        {
+            c_window& window_ = c_window::get();
+
+            c_window::s_frame_buffer frame_buffer_ = window_.get_frame_buffer();
+
+            result_ =
+            {
+                static_cast<uint32_t>(frame_buffer_.w),
+                static_cast<uint32_t>(frame_buffer_.h)
+            };
+
+            result_.width 
+                = std::clamp(result_.width, _capabilities.minImageExtent.width, _capabilities.maxImageExtent.width);
+
+            result_.height 
+                = std::clamp(result_.height, _capabilities.minImageExtent.height, _capabilities.maxImageExtent.height);
+        }
+
+        return result_;
+    }
+    bool c_vulkan_instance::create_swapchain()
+    {
+        bool result_ = false;
+        
+        m_sc_khr = get_swap_chain_and_khr_surface_details();
+
+        if (check_swap_chain_support())
+        {
+            VkSurfaceFormatKHR  surface_format_ = choose_surface_format(m_sc_khr.vec_format);
+            VkPresentModeKHR    present_mode_ = choose_swap_present_mode(m_sc_khr.vec_present_mode);
+            VkExtent2D          extent_ = choose_swap_extent(m_sc_khr.capabilities);
+        
+            uint32_t image_count_ = m_sc_khr.capabilities.minImageCount + 1;
+
+            if (m_sc_khr.capabilities.maxImageCount > 0
+                && image_count_ > m_sc_khr.capabilities.maxImageCount)
+            {
+                image_count_ = m_sc_khr.capabilities.maxImageCount;
+            }
+
+            VkSwapchainCreateInfoKHR create_info_{};
+
+            create_info_.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+            create_info_.surface = m_surface;
+            create_info_.minImageCount = image_count_;
+            create_info_.imageFormat = surface_format_.format;
+            create_info_.imageColorSpace = surface_format_.colorSpace;
+            create_info_.imageExtent = extent_;
+            create_info_.imageArrayLayers = 1;
+            create_info_.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+
+            uint32_t queue_family_indices_[] 
+                = { m_queue_indices.graphics_familiy.value(), m_queue_indices.present_familiy.value() };
+
+            if (m_queue_indices.graphics_familiy != m_queue_indices.present_familiy) 
+            {
+                create_info_.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+                create_info_.queueFamilyIndexCount = 2;
+                create_info_.pQueueFamilyIndices = queue_family_indices_;
+            }
+            else 
+            {
+                create_info_.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+                create_info_.queueFamilyIndexCount = 0; 
+                create_info_.pQueueFamilyIndices = nullptr;
+            }
+
+            create_info_.preTransform = m_sc_khr.capabilities.currentTransform;
+
+            create_info_.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+
+            create_info_.presentMode = present_mode_;
+            create_info_.clipped = VK_TRUE;
+
+            create_info_.oldSwapchain = VK_NULL_HANDLE;
+
+            if (vkCreateSwapchainKHR(m_logical_device, &create_info_, nullptr, &m_swap_chain) != VK_SUCCESS) 
+            {
+                m_logger << "ERROR: failed creating swap chain\n";
+            }
+            else
+            {
+                result_ = true;
+            }
+        }
+
+        return result_;
+    }
+    void c_vulkan_instance::destroy_swapchain()
+    {
+        vkDestroySwapchainKHR(m_logical_device, m_swap_chain, nullptr);
+    }
+
     bool c_vulkan_instance::select_best_device()
     {
         bool result = false;
@@ -642,10 +785,8 @@ namespace owd
             create_presentation_queue();
 
             retrieve_queue_handles();
-
-            m_sc_khr = get_swap_chain_and_khr_surface_details();
             
-            if (check_swap_chain_support())
+            if (create_swapchain())
             {
                 result = true;
 
@@ -688,9 +829,7 @@ namespace owd
 
                         retrieve_queue_handles();
 
-                        m_sc_khr = get_swap_chain_and_khr_surface_details();
-
-                        if (check_swap_chain_support())
+                        if (create_swapchain())
                         {
                             result = true;
                         }
@@ -757,6 +896,8 @@ namespace owd
     {
         if (m_singleton)
         {
+            destroy_swapchain();
+            
             destroy_surface();
 
             terminate_debug_callback();

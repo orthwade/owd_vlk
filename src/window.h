@@ -26,6 +26,13 @@ namespace owd
     class c_window : public c_singleton
     {
     public:
+
+        struct s_frame_buffer
+        {
+            int32_t w;
+            int32_t h;
+        };
+
         /// <summary>
         /// Create singleton object, if not created already. 
         /// Open window with given width, height and GLFW hints.
@@ -41,6 +48,11 @@ namespace owd
                         { GLFW_CLIENT_API, GLFW_NO_API },
                         { GLFW_RESIZABLE, GLFW_FALSE }
                     });
+
+        /// <summary>
+        /// Same as c_window::init, but with default c_window::init parameters.
+        /// </summary>
+        inline static c_window& get() { return m_singleton ? *m_singleton : *(m_singleton = &init()); }
 
         /// <summary>
         /// Get true if window is created, false, otherwise.
@@ -59,6 +71,11 @@ namespace owd
         /// Set windows mode to fullscreen.
         /// </summary>
         void set_fullscreen();
+
+        /// <summary>
+        /// Get frame buffer.
+        /// </summary>
+        s_frame_buffer get_frame_buffer();
 
         /// @brief Close window.
         inline void close() { GLFW_CALL(glfwDestroyWindow(m_glfw_wnd)); }
