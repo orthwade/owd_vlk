@@ -42,7 +42,7 @@ namespace owd
 			inline bool is_complete() const { return graphics_familiy.has_value() && present_familiy.has_value(); }
 		};
 
-		struct s_swap_chain_and_khr_surface_details 
+		struct s_swapchain_and_khr_surface_details 
 		{
 			VkSurfaceCapabilitiesKHR capabilities;
 		
@@ -58,7 +58,7 @@ namespace owd
 			idx_t		index;
 		};
 
-		using s_sc_khr_t = s_swap_chain_and_khr_surface_details;
+		using s_sc_khr_t = s_swapchain_and_khr_surface_details;
 
 		using surface_format_t = VkSurfaceFormatKHR;
 
@@ -100,7 +100,12 @@ namespace owd
 		/// <summary>
 		/// Get vector of physical device info.
 		/// </summary>
-		const vec_t<s_phys_device_info>& get_vec_phys_device_info() const { return m_vec_phys_device_info; }
+		inline const vec_t<s_phys_device_info>& get_vec_phys_device_info() const { return m_vec_phys_device_info; }
+
+		/// <summary>
+		/// Get vector of swapchain image handles.
+		/// </summary>
+		inline const vec_t<VkImage>& get_vec_swapchain_image() const { return m_vec_swapchain_image; }
 
 	protected:
 		c_logger m_logger;
@@ -157,7 +162,13 @@ namespace owd
 
 		s_sc_khr_t m_sc_khr;
 
-		VkSwapchainKHR m_swap_chain;
+		VkSwapchainKHR m_swapchain;
+
+		vec_t<VkImage> m_vec_swapchain_image;
+
+		VkFormat m_swapchain_image_format;
+		
+		VkExtent2D m_swapchain_extent;
 
 		static c_vulkan_instance* m_singleton;
 
@@ -218,7 +229,7 @@ namespace owd
 
 		s_queue_indices find_queue_families(const VkPhysicalDevice& _device);
 
-		bool add_swap_chain_support();
+		bool add_swapchain_support();
 
 		bool create_logical_device();
 
@@ -226,9 +237,9 @@ namespace owd
 
 		void retrieve_queue_handles();
 
-		s_sc_khr_t get_swap_chain_and_khr_surface_details();
+		s_sc_khr_t get_swapchain_and_khr_surface_details();
 
-		bool check_swap_chain_support();
+		bool check_swapchain_support();
 
 		VkSurfaceFormatKHR	choose_surface_format(const vec_t<VkSurfaceFormatKHR>& _vec_format);
 		VkPresentModeKHR	choose_swap_present_mode(const std::vector<VkPresentModeKHR>& _vec_mode);
@@ -237,8 +248,5 @@ namespace owd
 		bool create_swapchain();
 
 		void destroy_swapchain();
-
-		
-
 	};
 } // namespace owd

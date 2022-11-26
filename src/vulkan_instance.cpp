@@ -64,7 +64,10 @@ namespace owd
         m_logical_device(),
         m_graphics_queue(),
         m_sc_khr(),
-        m_swap_chain()
+        m_swapchain(),
+        m_vec_swapchain_image(),
+        m_swapchain_image_format(),
+        m_swapchain_extent()
     {
         m_glfw_init_result = c_glfw_init::init();
 
@@ -467,7 +470,7 @@ namespace owd
         return result_;
     }
 
-    bool c_vulkan_instance::add_swap_chain_support()
+    bool c_vulkan_instance::add_swapchain_support()
     {
         bool result = false;
 
@@ -540,7 +543,7 @@ namespace owd
             m_logical_device_create_info.enabledLayerCount = 0;
         }
 
-        if (add_swap_chain_support())
+        if (add_swapchain_support())
         {
             if (vkCreateDevice(m_physical_device, &m_logical_device_create_info, nullptr, &m_logical_device) != VK_SUCCESS)
             {
@@ -566,7 +569,7 @@ namespace owd
         vkGetDeviceQueue(m_logical_device, m_queue_indices.graphics_familiy.value(), 0, &m_graphics_queue);
     }
 
-    c_vulkan_instance::s_sc_khr_t c_vulkan_instance::get_swap_chain_and_khr_surface_details()
+    c_vulkan_instance::s_sc_khr_t c_vulkan_instance::get_swapchain_and_khr_surface_details()
     {
         c_vulkan_instance::s_sc_khr_t result{};
 
@@ -599,7 +602,7 @@ namespace owd
         return result;
     }
 
-    bool c_vulkan_instance::check_swap_chain_support()
+    bool c_vulkan_instance::check_swapchain_support()
     {
         bool result = false;
 
@@ -695,9 +698,9 @@ namespace owd
     {
         bool result_ = false;
         
-        m_sc_khr = get_swap_chain_and_khr_surface_details();
+        m_sc_khr = get_swapchain_and_khr_surface_details();
 
-        if (check_swap_chain_support())
+        if (check_swapchain_support())
         {
             VkSurfaceFormatKHR  surface_format_ = choose_surface_format(m_sc_khr.vec_format);
             VkPresentModeKHR    present_mode_ = choose_swap_present_mode(m_sc_khr.vec_present_mode);
@@ -747,12 +750,21 @@ namespace owd
 
             create_info_.oldSwapchain = VK_NULL_HANDLE;
 
-            if (vkCreateSwapchainKHR(m_logical_device, &create_info_, nullptr, &m_swap_chain) != VK_SUCCESS) 
+            if (vkCreateSwapchainKHR(m_logical_device, &create_info_, nullptr, &m_swapchain) != VK_SUCCESS) 
             {
                 m_logger << "ERROR: failed creating swap chain\n";
             }
             else
             {
+                vkGetSwapchainImagesKHR(m_logical_device, m_swapchain, &image_count_, nullptr);
+
+                m_vec_swapchain_image.resize(image_count_);
+
+                vkGetSwapchainImagesKHR(m_logical_device, m_swapchain, &image_count_, m_vec_swapchain_image.data());
+
+                m_swapchain_image_format = surface_format_.format;
+                m_swapchain_extent       = extent_;
+
                 result_ = true;
             }
         }
@@ -761,7 +773,7 @@ namespace owd
     }
     void c_vulkan_instance::destroy_swapchain()
     {
-        vkDestroySwapchainKHR(m_logical_device, m_swap_chain, nullptr);
+        vkDestroySwapchainKHR(m_logical_device, m_swapchain, nullptr);
     }
 
     bool c_vulkan_instance::select_best_device()

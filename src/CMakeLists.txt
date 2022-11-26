@@ -20,6 +20,12 @@ SET(GCC_COVERAGE_LINK_FLAGS
 "-lXrandr"
 "-lXi")
 
+if (MSVC)
+    add_compile_definitions(_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING)
+else()
+
+endif()
+
 message(STATUS ${Vulkan_INCLUDE_DIR})
 message(STATUS ${VULKAN_LIB_LIST})
 message(STATUS ${Vulkan_LIBRARIES})
