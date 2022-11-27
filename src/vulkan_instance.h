@@ -27,6 +27,7 @@
 #include "window.h"
 
 #include "vulkan_debug.h"
+#include "vulkan_surface.h"
 
 namespace owd
 {
@@ -132,7 +133,7 @@ namespace owd
 
 		c_vulkan_debug* m_debug;
 
-		VkSurfaceKHR m_surface;
+		c_vulkan_surface::ptr m_surface;
 
 		VkQueue m_present_queue;
 
@@ -198,10 +199,6 @@ namespace owd
 		void destroy_instance();
 
 		void terminate_debug_callback();
-
-		void create_surface();
-
-		void destroy_surface();
 
 		void create_presentation_queue();
 		

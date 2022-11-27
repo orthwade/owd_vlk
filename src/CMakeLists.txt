@@ -38,6 +38,7 @@ glfw_init.h			glfw_init.cpp
 window.h			window.cpp
 monitor.h			monitor.cpp
 vulkan_debug.h      vulkan_debug.cpp
+vulkan_surface.h    vulkan_surface.cpp
 vulkan_instance.h   vulkan_instance.cpp
 app.h				app.cpp
 main.cpp)

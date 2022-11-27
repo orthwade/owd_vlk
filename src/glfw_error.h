@@ -29,7 +29,7 @@ namespace owd
         using ptr = std::shared_ptr<c_glfw_error>;
 
         /// <summary>
-        /// Construct object with given name, 
+        /// Construct object with given code, 
         /// make shared_ptr of this object class and get this shared_ptr.	
         /// </summary>
         /// <returns></returns>

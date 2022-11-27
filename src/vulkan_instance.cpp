@@ -56,7 +56,9 @@ namespace owd
 
         m_debug->create(m_instance);
 
-        create_surface();
+        m_surface = c_vulkan_surface::make(m_instance);
+
+        m_surface->create();
 
         list_physical_devices();
     }
@@ -150,54 +152,6 @@ namespace owd
     void c_vulkan_instance::destroy_instance()
     {
         vkDestroyInstance(m_instance, nullptr);
-    }
-
-    void c_vulkan_instance::create_surface()
-    {
-        #ifdef WIN32
-        {
-            //VkWin32SurfaceCreateInfoKHR surface_create_info_{};
-
-            //surface_create_info_.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-
-            //c_window& window_ = c_window::get();
-            //
-            //if (!window_.get_glfw_wnd_ptr())
-            //{
-            //    window_.init();
-            //}
-
-            //surface_create_info_.hwnd = glfwGetWin32Window(window_.get_glfw_wnd_ptr());
-
-            //surface_create_info_.hinstance = GetModuleHandle(nullptr);
-
-            //if (vkCreateWin32SurfaceKHR(m_instance, &surface_create_info_, nullptr, &m_surface) != VK_SUCCESS) 
-            //{
-            //    m_logger << L"ERROR: failed to create window surface!\n";
-            //    ASSERT(false);
-            //}
-        }
-        #else
-        {
-            //m_logger << L"ERROR: only WIN32 is implemented!\n";
-            //ASSERT(false);
-        }
-        #endif // WIN32
-
-        c_window& window_ = c_window::init();
-
-        GLFWwindow* ptr_glfw_window_ = window_.get_glfw_wnd_ptr();
-
-        if (glfwCreateWindowSurface(m_instance, ptr_glfw_window_, nullptr, &m_surface) != VK_SUCCESS)
-        {
-            m_logger << L"ERROR: failed to create window surface!\n";
-            ASSERT(false);
-        }
-    }
-
-    void c_vulkan_instance::destroy_surface()
-    {
-        vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
     }
 
     void c_vulkan_instance::create_presentation_queue()
@@ -345,7 +299,7 @@ namespace owd
 
                 VkBool32 present_support_ = false;
 
-                vkGetPhysicalDeviceSurfaceSupportKHR(m_physical_device, i_, m_surface, &present_support_);
+                vkGetPhysicalDeviceSurfaceSupportKHR(m_physical_device, i_, m_surface->get_surface(), &present_support_);
 
                 if (present_support_)
                 {
@@ -464,30 +418,32 @@ namespace owd
     {
         c_vulkan_instance::s_sc_khr_t result{};
 
-        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physical_device, m_surface, &result.capabilities);
+        VkSurfaceKHR surface_ = m_surface->get_surface();
+        
+        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physical_device, surface_, &result.capabilities);
 
         uint32_t format_count_ = 0;
 
-        vkGetPhysicalDeviceSurfaceFormatsKHR(m_physical_device, m_surface, &format_count_, nullptr);
+        vkGetPhysicalDeviceSurfaceFormatsKHR(m_physical_device, surface_, &format_count_, nullptr);
 
         result.vec_format.resize(format_count_);
 
         if (!result.vec_format.empty())
         {
             vkGetPhysicalDeviceSurfaceFormatsKHR
-            (m_physical_device, m_surface, &format_count_, result.vec_format.data());
+            (m_physical_device, surface_, &format_count_, result.vec_format.data());
         }
 
         uint32_t present_mode_count_ = 0;
 
-        vkGetPhysicalDeviceSurfacePresentModesKHR(m_physical_device, m_surface, &present_mode_count_, nullptr);
+        vkGetPhysicalDeviceSurfacePresentModesKHR(m_physical_device, surface_, &present_mode_count_, nullptr);
 
         result.vec_present_mode.resize(present_mode_count_);
 
         if (!result.vec_present_mode.empty())
         {
             vkGetPhysicalDeviceSurfacePresentModesKHR
-            (m_physical_device, m_surface, &present_mode_count_, result.vec_present_mode.data());
+            (m_physical_device, surface_, &present_mode_count_, result.vec_present_mode.data());
         }
 
         return result;
@@ -608,7 +564,7 @@ namespace owd
             VkSwapchainCreateInfoKHR create_info_{};
 
             create_info_.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-            create_info_.surface = m_surface;
+            create_info_.surface = m_surface->get_surface();
             create_info_.minImageCount = image_count_;
             create_info_.imageFormat = surface_format_.format;
             create_info_.imageColorSpace = surface_format_.colorSpace;
@@ -795,7 +751,7 @@ namespace owd
         {
             destroy_swapchain();
             
-            destroy_surface();
+            m_surface->destroy();
 
             terminate_debug_callback();
             
