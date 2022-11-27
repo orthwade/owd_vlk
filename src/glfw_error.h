@@ -138,10 +138,6 @@ namespace owd
         const umap_t<int32_t, const c_glfw_error> m_map_error;
     };
 
-    #ifndef ASSERT
-    #define ASSERT(_x) if(!(_x)) __debugbreak();
-    #endif // !ASSERT
-
     #ifndef GLFW_DEBUG
     #define GLFW_DEBUG
     #endif // !GLFW_DEBUG

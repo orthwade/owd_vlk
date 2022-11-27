@@ -37,6 +37,7 @@ glfw_error.h		glfw_error.cpp
 glfw_init.h			glfw_init.cpp  
 window.h			window.cpp
 monitor.h			monitor.cpp
+vulkan_debug.h      vulkan_debug.cpp
 vulkan_instance.h   vulkan_instance.cpp
 app.h				app.cpp
 main.cpp)

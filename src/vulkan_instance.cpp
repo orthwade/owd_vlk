@@ -42,6 +42,7 @@ namespace owd
         m_instance_create_info(),
         m_instance_create_result(),
         m_vec_supported_instance_ext(),
+        m_debug(c_vulkan_debug::get_ptr()),
         m_vec_layer_name
         ({
             "VK_LAYER_KHRONOS_validation"
@@ -166,6 +167,7 @@ namespace owd
 
     void c_vulkan_instance::set_create_info()
     {
+        m_instance_create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
         m_instance_create_info.enabledExtensionCount = static_cast<uint32_t>(m_vec_instance_ext_name.size());
         m_instance_create_info.ppEnabledExtensionNames = m_vec_instance_ext_name.data();
     }
@@ -895,13 +897,7 @@ namespace owd
 
     void c_vulkan_instance::terminate_debug_callback()
     {
-        auto func_ = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr
-        (m_instance, "vkDestroyDebugUtilsMessengerEXT");
-
-        if (func_ != nullptr) 
-        {
-            func_(m_instance, m_debug_messenger, nullptr);
-        }
+        m_debug->terminate(&m_instance, m_debug_messenger);
     }
 
     void c_vulkan_instance::terminate()

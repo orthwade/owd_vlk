@@ -26,6 +26,8 @@
 #include "glfw_init.h"
 #include "window.h"
 
+#include "vulkan_debug.h"
+
 namespace owd
 {
 	/// <summary>
@@ -127,6 +129,8 @@ namespace owd
 		VkResult m_instance_create_result;
 
 		std::vector<VkExtensionProperties> m_vec_supported_instance_ext;
+
+		c_vulkan_debug* m_debug;
 
 		vec_t<const char*> m_vec_layer_name;
 

@@ -34,4 +34,9 @@ namespace owd
 
 	typedef std::string_view sv_t;
 	typedef std::wstring_view wsv_t;
+
+	#ifndef ASSERT
+	#define ASSERT(_x) if(!(_x)) __debugbreak();
+	#endif // !ASSERT
+
 } // namespace owd
