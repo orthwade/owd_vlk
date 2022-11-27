@@ -56,6 +56,13 @@ namespace owd
 		inline const vec_t<const char*>& get_vec_validation_layer_name() const { return m_vec_layer_name; }
 
 		/// <summary>
+		/// Check if VK_LAYER_KHRONOS_validation is supported.
+		/// </summary>
+		/// <returns></returns>
+		bool check_validation_layer_support();
+
+
+		/// <summary>
 		/// Set validation layers info to instance create info.
 		/// </summary>
 		bool set_validation_layers(VkInstanceCreateInfo& _instance_create_info);
@@ -68,14 +75,14 @@ namespace owd
 		/// <summary>
 		/// Create debugger if necessary.
 		/// </summary>
-		bool create(VkInstance* _instance);
+		bool create(const VkInstance& _instance);
 
 		inline VkDebugUtilsMessengerEXT& get_debug_messenger() { return m_debug_messenger; }
 
 		/// <summary>
 		/// Terminate the object.
 		/// </summary>
-		void terminate(VkInstance* _instance, const VkDebugUtilsMessengerEXT& _debug_messenger);
+		void terminate(VkInstance* _instance);
 
 	protected:
 		c_vulkan_debug();
@@ -88,7 +95,6 @@ namespace owd
 
 		VkDebugUtilsMessengerEXT m_debug_messenger;
 
-		bool check_validation_layer_support();
 
 		void terminate();
 

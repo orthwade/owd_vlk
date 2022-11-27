@@ -91,7 +91,7 @@ namespace owd
         return result_;
     }
 
-    void c_vulkan_debug::terminate(VkInstance* _instance, const VkDebugUtilsMessengerEXT& _debug_messenger)
+    void c_vulkan_debug::terminate(VkInstance* _instance)
     {
         if (m_singleton)
         {
@@ -100,8 +100,9 @@ namespace owd
 
             if (func_ != nullptr)
             {
-                func_(*_instance, _debug_messenger, nullptr);
+                func_(*_instance, m_debug_messenger, nullptr);
             }
+            m_debug_messenger = nullptr;
             terminate();
         }
     }
@@ -177,11 +178,9 @@ namespace owd
         return result_;
     }
 
-    bool c_vulkan_debug::create(VkInstance* _instance)
+    bool c_vulkan_debug::create(const VkInstance& _instance)
     {
         bool result_ = false;
-
-        VkInstance instance_ = *_instance;
 
         if (m_should_enable_validation_layers)
         {
@@ -197,11 +196,11 @@ namespace owd
 
             m_debug_create_info.pUserData = nullptr;
 
-            auto func_ = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance_, "vkCreateDebugUtilsMessengerEXT");
+            auto func_ = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(_instance, "vkCreateDebugUtilsMessengerEXT");
 
             if (func_ != nullptr)
             {
-                if (func_(instance_, &m_debug_create_info, nullptr, &m_debug_messenger) != VK_SUCCESS)
+                if (func_(_instance, &m_debug_create_info, nullptr, &m_debug_messenger) != VK_SUCCESS)
                 {
                     m_logger << L"ERROR: failed to set up debug messenger\n";
                     ASSERT(false);
@@ -217,7 +216,6 @@ namespace owd
                 ASSERT(false);
             }
         }
-        *_instance = instance_;
         return result_;
     }
 

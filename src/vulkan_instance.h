@@ -132,14 +132,6 @@ namespace owd
 
 		c_vulkan_debug* m_debug;
 
-		vec_t<const char*> m_vec_layer_name;
-
-		const bool m_should_enable_validation_layers;
-
-		VkDebugUtilsMessengerCreateInfoEXT m_debug_create_info{};
-		
-		VkDebugUtilsMessengerEXT m_debug_messenger;
-
 		VkSurfaceKHR m_surface;
 
 		VkQueue m_present_queue;
@@ -204,18 +196,6 @@ namespace owd
 		void create_instance();
 
 		void destroy_instance();
-
-		/// <summary>
-		/// Check stored member validation layers support.
-		/// </summary>
-		bool check_validation_layer_support();
-
-		/// <summary>
-		/// Set validation layers
-		/// </summary>
-		void set_validation_layers();
-
-		void set_debug_callback();
 
 		void terminate_debug_callback();
 
